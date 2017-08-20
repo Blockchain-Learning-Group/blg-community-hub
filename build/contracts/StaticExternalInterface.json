@@ -1,0 +1,32 @@
+{
+  "contract_name": "StaticExternalInterface",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "getUint",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_relay",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b60405160208061011683398101604052515b60008054600160a060020a031916600160a060020a0383161790555b505b60cc8061004a6000396000f300606060405263ffffffff60e060020a6000350416620267a48114601f575bfe5b3415602657fe5b602c603e565b60408051918252519081900360200190f35b60008054604080516020908101849052815160e260020a6199e90281529151600160a060020a0390931692620267a492600480820193929182900301818787803b1515608657fe5b6102c65a03f11515609357fe5b5050604051519150505b905600a165627a7a72305820d7c34d3ef485ab732ec2836578786a53b7efbda51fc518661a3fed9c63c2d2780029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1503261828826
+}

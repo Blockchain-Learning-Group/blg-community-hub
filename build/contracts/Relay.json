@@ -1,0 +1,123 @@
+{
+  "contract_name": "Relay",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_versionNumber",
+          "type": "uint256"
+        },
+        {
+          "name": "_newContract",
+          "type": "address"
+        }
+      ],
+      "name": "upgrade",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_versionNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "rollback",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "name": "returnDataSizes_",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_funcSig",
+          "type": "string"
+        },
+        {
+          "name": "_returnSize",
+          "type": "uint32"
+        }
+      ],
+      "name": "addReturnDataSize",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentContract_",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_currentContract",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "payable": true,
+      "type": "fallback"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b6040516020806102f383398101604052515b61003660018264010000000061016261003d82021704565b5b50610073565b60008281526001602052604081208054600160a060020a038416600160a060020a031991821681179092558254161790555b5050565b610271806100826000396000f300606060405236156100515763ffffffff60e060020a600035041663028f4e4781146100a25780630da9da20146100c3578063206099e3146100d8578063457b94811461010e5780634e1a929214610136575b6100a05b60008054600160e060020a0319823516825260026020526040822054600160a060020a039091169163ffffffff9091169036908037806000366000856127105a03f4816000f35b5050565b005b34156100aa57fe5b6100a0600435600160a060020a0360243516610162565b005b34156100cb57fe5b6100a0600435610198565b005b34156100e057fe5b6100f5600160e060020a0319600435166101c5565b6040805163ffffffff9092168252519081900360200190f35b341561011657fe5b6100a0602460048035828101929101359063ffffffff9035166101dd565b005b341561013e57fe5b610146610236565b60408051600160a060020a039092168252519081900360200190f35b60008281526001602052604081208054600160a060020a038416600160a060020a031991821681179092558254161790555b5050565b6000818152600160205260408120548154600160a060020a031916600160a060020a039091161790555b50565b60026020526000908152604090205463ffffffff1681565b80600260008585604051808383808284376040805193909101839003909220600160e060020a031916865250602085019590955250505001600020805463ffffffff191663ffffffff929092169190911790555b505050565b600054600160a060020a0316815600a165627a7a72305820476a683cdb67ab3010b10611b0610d811f04726e8c79d3a231a800910ec7a04f0029",
+  "networks": {
+    "1503264444821": {
+      "links": {},
+      "events": {},
+      "updated_at": 1503264989094
+    },
+    "1503265028853": {
+      "links": {},
+      "events": {},
+      "updated_at": 1503265574457,
+      "address": "0x06b5835333d696eef4faec6a7aab8a1766e0b85a"
+    },
+    "1503265977317": {
+      "links": {},
+      "events": {},
+      "updated_at": 1503267168364
+    },
+    "1503267264350": {
+      "links": {},
+      "events": {},
+      "updated_at": 1503267273986
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1503267273986
+}

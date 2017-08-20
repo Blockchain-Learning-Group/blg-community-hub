@@ -1,37 +1,16 @@
-const Hub = artifacts.require('./Hub.sol')
-const HubInterface = artifacts.require('./HubInterface.sol')
-const HubRelay = artifacts.require('./HubRelay.sol')
-const HubRelayStorage = artifacts.require('./HubRelayStorage.sol')
-const HubLib = artifacts.require('./Hub.sol')
+const StaticHub = artifacts.require('./StaticHub.sol');
+const Hub = artifacts.require('./Hub.sol');
+const Relay = artifacts.require('./Relay.sol');
 
-module.exports = deployer => {
-  // Hub upgradeable library
-  
+module.exports = async deployer => {
+  await deployer.deploy(Hub);
+  const hub = await Hub.deployed()
 
-  // deployer.deploy(HubLib).then(() => {
-  //   HubLib.deployed().then(hubLib => {
-  //     deployer.deploy(HubRelayStorage, hubLib.address).then(() => {
-  //       HubRelayStorage.deployed().then(hubRelayStorage => {
-  //
-  //         HubRelay.unlinked_binary = HubRelay.unlinked_binary.replace(
-  //           '1111222233334444555566667777888899990000',
-  //           hubRelayStorage.address.slice(2)
-  //         )
-  //
-  //         deployer.deploy(HubRelay).then(() => {
-  //           HubRelay.deployed().then(hubRelay => {
-  //
-  //             Hub.link('HubInterface', hubRelay.address)
-  //
-  //             console.log('Hub Linked!')
-  //
-  //             deployer.deploy(Hub).then(() => {
-  //               console.log('hub deployed')
-  //             })
-  //           })
-  //         })
-  //       })
-  //     })
-  //   })
+  await deployer.deploy(Relay, hub.address)
+  const relay = await Relay.deployed()
 
+  // Add all interface methods return data sizes
+  await relay.addReturnDataSize('getUint()', 32)
+
+  deployer.deploy(StaticHub, relay.address)
 };
