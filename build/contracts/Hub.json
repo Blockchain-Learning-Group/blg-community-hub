@@ -1,0 +1,37 @@
+{
+  "contract_name": "Hub",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "test",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": false,
+      "type": "constructor"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b5b5b5b60e08061001d6000396000f300606060405263ffffffff60e060020a600035041663f8a8fd6d81146020575bfe5b3415602757fe5b602d603f565b60408051918252519081900360200190f35b6000600073__HubInterface__________________________636fc30b5090916000604051602001526040518263ffffffff1660e060020a0281526004018082815260200191505060206040518083038186803b1515609a57fe5b6102c65a03f4151560a757fe5b5050604051519150505b905600a165627a7a7230582033316471a764c79f8dcfc34fecc568b33ee1ae103713ebc45c628752a66236b30029",
+  "networks": {
+    "1503172314033": {
+      "links": {
+        "HubInterface": "0x6056e360a1374bc18bdfde5cd45271f58d4a3cd8",
+        "Hub": "0x094b7b82a7073e074b20d33fa408aaac699af4df"
+      },
+      "events": {},
+      "updated_at": 1503181321319,
+      "address": "0x53385dc3c56ecb7fd230ae21a3c7c2a5b74826d0"
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1503181321319
+}

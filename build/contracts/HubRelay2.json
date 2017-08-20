@@ -1,0 +1,22 @@
+{
+  "contract_name": "HubRelay2",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "test",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x60606040523415600b57fe5b5b60718061001a6000396000f300606060405263ffffffff60e060020a600035041663f8a8fd6d81146020575bfe5b3415602757fe5b602d603f565b60408051918252519081900360200190f35b60025b905600a165627a7a72305820133407d90c35773352663198426f9f354edf3198c31f74158fcfa339f39326cf0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1503172219743
+}

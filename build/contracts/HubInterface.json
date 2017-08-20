@@ -1,0 +1,50 @@
+{
+  "contract_name": "HubInterface",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_self",
+          "type": "HubInterface.HubStorage storage"
+        },
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "init",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_self",
+          "type": "HubInterface.HubStorage storage"
+        }
+      ],
+      "name": "test",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x",
+  "networks": {
+    "1503172314033": {
+      "links": {},
+      "events": {},
+      "updated_at": 1503181321320
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1503181321320
+}
