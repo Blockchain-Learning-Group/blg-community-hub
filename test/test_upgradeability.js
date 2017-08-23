@@ -9,18 +9,18 @@ contract('Hub Contracts', accounts => {
   /**
    * Non upgradeable pattern
    */
-  it("should access the upgrade contract in a non upgradeable pattern!", async () => {
+  it.skip("should access the upgrade contract in a non upgradeable pattern!", async () => {
     const hub = await Hub.new()
     const staticHub = await StaticHub.new(hub.address)
 
     response = await staticHub.getUint.call()
     assert.equal(response.toNumber(), 1, 'hub incorrect')
-  });
+  })
 
   /**
    * Upgradeable
    */
-  it("should upgrade from v1 to v2", async () => {
+  it.skip("should upgrade from v1 to v2", async () => {
     const hub = await Hub.new()
     const relay = await Relay.new(hub.address)
     const staticHub = await StaticHub.new(relay.address)
@@ -37,12 +37,12 @@ contract('Hub Contracts', accounts => {
     // Second version returns 2
     response = await staticHub.getUint.call()
     assert.equal(response.toNumber(), 2, 'upgrapdeable v2 incorrect')
-  });
+  })
 
   /**
    * Versioning
    */
-  it("should upgrade from v1 to v2 and rollback to v1", async () => {
+  it.skip("should upgrade from v1 to v2 and rollback to v1", async () => {
     const hub = await Hub.new()
     const relay = await Relay.new(hub.address)
     const staticHub = await StaticHub.new(relay.address)
@@ -66,5 +66,5 @@ contract('Hub Contracts', accounts => {
     // Second version returns 2
     response = await staticHub.getUint.call()
     assert.equal(response.toNumber(), 1, 'rollback v1 incorrect')
-  });
-});
+  })
+})

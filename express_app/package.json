@@ -1,0 +1,17 @@
+{
+  "name": "blg-community-hub",
+  "version": "0.0.1",
+  "license": "TBD",
+  "private:": false,
+  "dependencies": {
+    "express": "^4.15.4",
+    "web3": "0.20.0"
+  },
+  "scripts": {
+    "start": "node ./server.js",
+    "test": "./node_modules/.bin/mocha --reporter spec"
+  },
+  "engines": {
+    "node": ">=8"
+  }
+}

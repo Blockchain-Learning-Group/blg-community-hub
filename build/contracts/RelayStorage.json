@@ -1,0 +1,97 @@
+{
+  "contract_name": "RelayStorage",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_versionNumber",
+          "type": "uint256"
+        },
+        {
+          "name": "_newLib",
+          "type": "address"
+        }
+      ],
+      "name": "upgrade",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentLib_",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_versionNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "rollback",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_funcSig",
+          "type": "string"
+        },
+        {
+          "name": "_returnSize",
+          "type": "uint32"
+        }
+      ],
+      "name": "addReturnDataSize",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "name": "returnSizes_",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_currentLib",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b60405160208061029e83398101604052515b61003660018264010000000061010d61003d82021704565b5b50610073565b60008281526001602052604081208054600160a060020a038416600160a060020a031991821681179092558254161790555b5050565b61021c806100826000396000f300606060405263ffffffff60e060020a600035041663028f4e47811461004d5780630bb9740b1461006e5780630da9da201461009a578063457b9481146100af578063df07037d146100d7575bfe5b341561005557fe5b61006c600435600160a060020a036024351661010d565b005b341561007657fe5b61007e610143565b60408051600160a060020a039092168252519081900360200190f35b34156100a257fe5b61006c600435610152565b005b34156100b757fe5b61006c602460048035828101929101359063ffffffff90351661017f565b005b34156100df57fe5b6100f4600160e060020a0319600435166101d8565b6040805163ffffffff9092168252519081900360200190f35b60008281526001602052604081208054600160a060020a038416600160a060020a031991821681179092558254161790555b5050565b600054600160a060020a031681565b6000818152600160205260408120548154600160a060020a031916600160a060020a039091161790555b50565b80600260008585604051808383808284376040805193909101839003909220600160e060020a031916865250602085019590955250505001600020805463ffffffff191663ffffffff929092169190911790555b505050565b60026020526000908152604090205463ffffffff16815600a165627a7a7230582028a7dc8851204c663e5108100d35b997a6be715bfad8ad08bc83c5ede292998e0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1503513283869
+}
