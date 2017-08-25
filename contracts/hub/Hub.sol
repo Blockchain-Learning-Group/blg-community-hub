@@ -59,8 +59,8 @@ library Hub {
   ) external
     returns (bool)
   {
-    // 1 == active as per HubInterface.State
-    if (_self.users_[msg.sender] != HubInterface.State.active)
+    // 1 == active as per HubInterface.State_
+    if (_self.userData_[msg.sender].state_ != HubInterface.State_.active)
       return ErrorLib.messageString('User is not active, Hub.addResource()');
 
     if (bytes(_resourceUrl).length == 0)
@@ -84,26 +84,39 @@ library Hub {
   }
 
   /**
-   * @dev Add a new user to the hub. User may write to the hub.
-   * @param  _self The contract storage reference.
-   * @param _user EOA identifier of the user.
-   * @return Success of the transaction.
-   */
+  * @dev Add a new user that may write to the hub.
+  * @param _self The contract storage reference.
+  * @param _userEOA User owner EOD, used as their id.
+  * @param _userName Screen or real name of user.
+  * @param _position Professional position.
+  * @param _location Geographic location.
+  * @return Success of the transaction.
+  */
   function addUser (
     HubInterface.Data_ storage _self,
-    address _user
+    address _userEOA,
+    string _userName,
+    string _position,
+    string _location
   ) external
     returns (bool)
   {
     if (msg.sender !=_self.blg_)
       return ErrorLib.messageString('msg.sender != blg, Hub.addUser()');
 
-    if (_self.users_[_user] != HubInterface.State.newUser)
+    if (_self.userData_[_userEOA].state_ != HubInterface.State_.newUser)
       return ErrorLib.messageString('User already exists, Hub.addUser()');
 
-    _self.users_[_user] = HubInterface.State.active;
+    _self.users_.push(_userEOA);
 
-    LogUserAdded(_user);
+    _self.userData_[_userEOA] = HubInterface.User_({
+      userName_: _userName,
+      position_: _position,
+      location_: _location,
+      state_: HubInterface.State_.active
+    });
+
+    LogUserAdded(_userEOA);
 
     return true;
   }

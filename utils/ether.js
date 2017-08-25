@@ -19,7 +19,7 @@ async function deployHub (blgAccount) {
   // Add required method return sizes
   await relayStorage.addReturnDataSize('init(HubInterface.Data_ storage,address)', 0)
   await relayStorage.addReturnDataSize('addResource(HubInterface.Data_ storage,string)', 32)
-  await relayStorage.addReturnDataSize('addUser(HubInterface.Data_ storage,address)', 32)
+  await relayStorage.addReturnDataSize('addUser(HubInterface.Data_ storage,address,string,string,string)', 32)
 
   Relay.unlinked_binary = Relay.unlinked_binary.replace(
     '1111222233334444555566667777888899990000',

@@ -38,14 +38,22 @@ contract StaticHub is LoggingErrors {
 
    /**
     * @dev Add a new user that may write to the hub.
-    * @param _user The user that may write.
+    * @param _userEOA User owner EOD, used as their id.
+    * @param _userName Screen or real name of user.
+    * @param _position Professional position.
+    * @param _location Geographic location.
     * @return Success of the transaction.
     */
-  function addUser (address _user)
+  function addUser (
+    address _userEOA,
+    string _userName,
+    string _position,
+    string _location
+  )
     external
     returns (bool)
   {
-    return hub_.addUser(_user);
+    return hub_.addUser(_userEOA, _userName, _position, _location);
   }
 
   /**
@@ -58,5 +66,31 @@ contract StaticHub is LoggingErrors {
     returns (bool)
   {
     return hub_.addResource(_resourceUrl);
+  }
+
+  /**
+   * @return The array of users.
+   */
+  function getUsers ()
+    external
+    constant
+    returns(address[])
+  {
+    return hub_.users_;
+  }
+
+  /**
+   * @dev Get the user general data.
+   * @param _user The user EOA used as identifier.
+   * @return The struct of user data.
+   */
+  function getUserData (address _user)
+    external
+    constant
+    returns(string, string, string)
+  {
+    HubInterface.User_ memory user = hub_.userData_[_user];
+
+    return (user.userName_, user.position_, user.location_);
   }
 }

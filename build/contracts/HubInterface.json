@@ -31,25 +31,20 @@
           "type": "HubInterface.Data_ storage"
         },
         {
-          "name": "_blgToken",
+          "name": "_userEOA",
           "type": "address"
-        }
-      ],
-      "name": "init",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_self",
-          "type": "HubInterface.Data_ storage"
         },
         {
-          "name": "_user",
-          "type": "address"
+          "name": "_userName",
+          "type": "string"
+        },
+        {
+          "name": "_position",
+          "type": "string"
+        },
+        {
+          "name": "_location",
+          "type": "string"
         }
       ],
       "name": "addUser",
@@ -61,10 +56,27 @@
       ],
       "payable": false,
       "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_self",
+          "type": "HubInterface.Data_ storage"
+        },
+        {
+          "name": "_blgToken",
+          "type": "address"
+        }
+      ],
+      "name": "init",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
     }
   ],
   "unlinked_binary": "0x",
   "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1503518729533
+  "updated_at": 1503618058612
 }

@@ -5,13 +5,16 @@ let txResponse
 contract('StaticHub.addUser()', accounts => {
   const blgAccount = accounts[0]
   const user1 = accounts[1]
+  const name= 'adam'
+  const position = 'engineer'
+  const location = 'london'
 
   it("should add a new user to the hub.", async () => {
     const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
     const staticHub = hubAndBlgContracts[0]
 
-    callResponse = await staticHub.addUser.call(user1, { from: blgAccount })
-    txResponse = await staticHub.addUser(user1, { from: blgAccount })
+    callResponse = await staticHub.addUser.call(user1, name, position, location, { from: blgAccount })
+    txResponse = await staticHub.addUser(user1, name, position, location, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(callResponse, 'Call response was not true.')
@@ -25,8 +28,8 @@ contract('StaticHub.addUser()', accounts => {
     const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
     const staticHub = hubAndBlgContracts[0]
 
-    callResponse = await staticHub.addUser.call(user1, { from: user1 })
-    txResponse = await staticHub.addUser(user1, { from: user1 })
+    callResponse = await staticHub.addUser.call(user1, name, position, location, { from: user1 })
+    txResponse = await staticHub.addUser(user1, name, position, location, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')
@@ -42,10 +45,10 @@ contract('StaticHub.addUser()', accounts => {
     const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
     const staticHub = hubAndBlgContracts[0]
 
-    await staticHub.addUser(user1, { from: blgAccount })
+    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
 
-    callResponse = await staticHub.addUser.call(user1, { from: blgAccount })
-    txResponse = await staticHub.addUser(user1, { from: blgAccount })
+    callResponse = await staticHub.addUser.call(user1, name, position, location, { from: blgAccount })
+    txResponse = await staticHub.addUser(user1, name, position, location, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')

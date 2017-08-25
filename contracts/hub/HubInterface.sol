@@ -5,15 +5,25 @@ pragma solidity ^0.4.11;
  * @dev This is the interface that ALL Hub contracts must follow.
  */
 library HubInterface {
-
-  enum State { newUser, active, inactive, terminated }
-
+  /**
+   * Data Structures
+   */
   struct Data_ {
     address blg_; // owner EOA
     address blgToken_; // token contract
     string[] resources_; // data URLs
-    mapping(address => State) users_;
+    address[] users_; // used for user lookup and retrieval
+    mapping(address => User_) userData_;
   }
+
+  struct User_ {
+    string userName_;
+    string position_;
+    string location_;
+    State_ state_;
+  }
+
+  enum State_ { newUser, active, inactive, terminated }
 
   /**
    * @dev Initialize the hub.
@@ -38,13 +48,20 @@ library HubInterface {
     returns(bool);
 
   /**
-  * @dev Add a new user that may write to the hub.
-  * @param _user The user EOA.
-  * @return Success of the transaction.
-  */
+   * @dev Add a new user that may write to the hub.
+   * @param  _self The contract storage reference.
+   * @param _userEOA User owner EOD, used as their id.
+   * @param _userName Screen or real name of user.
+   * @param _position Professional position.
+   * @param _location Geographic location.
+   * @return Success of the transaction.
+   */
   function addUser (
     Data_ storage _self,
-    address _user
+    address _userEOA,
+    string _userName,
+    string _position,
+    string _location
   ) public
     returns (bool);
 }
