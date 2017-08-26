@@ -8,7 +8,9 @@
     "web3": "0.20.0"
   },
   "scripts": {
-    "addUsers": "node ./scripts/addUsers.js"
+    "addUsers": "node ./scripts/addUsers.js",
+    "addResources": "node ./scripts/addResources.js",
+    "testSetup": "node ./scripts/testSetup.js"
   },
   "engines": {
     "node": ">=8"

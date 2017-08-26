@@ -9,15 +9,17 @@ let txResponse
 contract('StaticHub.addResource()', accounts => {
   const blgAccount = accounts[0]
   const user1 = accounts[1]
+  const name= 'adam'
+  const position = 'engineer'
+  const location = 'london'
 
   it("should add a new resource and allocte tokens to the sender.", async () => {
     const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
     const staticHub = hubAndBlgContracts[0]
     const blgToken = hubAndBlgContracts[1]
-
-    await staticHub.addUser(user1, { from: blgAccount })
-
     let resource = 'https://github.com'
+
+    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
 
     callResponse = await staticHub.addResource.call(resource, { from: user1 })
     txResponse = await staticHub.addResource(resource, { from: user1 })
@@ -44,7 +46,7 @@ contract('StaticHub.addResource()', accounts => {
     const staticHub = hubAndBlgContracts[0]
     const blgToken = hubAndBlgContracts[1]
 
-    await staticHub.addUser(blgAccount, { from: blgAccount })
+    await staticHub.addUser(blgAccount, name, position, location, { from: blgAccount })
 
     let resource = 'https://github.com'
 
@@ -71,7 +73,7 @@ contract('StaticHub.addResource()', accounts => {
   it("should return false and emit LogErrorString when empty resource submitted.", async () => {
     const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
     const staticHub = hubAndBlgContracts[0]
-    await staticHub.addUser(user1, { from: blgAccount })
+    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
 
     let resource = ''
 
@@ -107,5 +109,28 @@ contract('StaticHub.addResource()', accounts => {
     assert.equal(eventLog.event, 'LogErrorString', 'LogErrorString event was not emitted.')
     const errorString = eventLog.args.errorString;
     assert.notEqual(errorString.indexOf('User is not active'), -1, "Incorrect error message: " + errorString)
+  })
+
+  it("should return false and emit LogErrorString when resource already exists.", async () => {
+    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
+    const staticHub = hubAndBlgContracts[0]
+    const blgToken = hubAndBlgContracts[1]
+    let resource = 'https://github.com'
+
+    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
+    await staticHub.addResource(resource, { from: user1 })
+
+    // add the resource again
+    callResponse = await staticHub.addResource.call(resource, { from: user1 })
+    txResponse = await staticHub.addResource(resource, { from: user1 })
+
+    // Assert after tx so we can see the emitted logs in the case of failure.
+    assert(!callResponse, 'Call response was not false.')
+
+    // Event emission
+    const eventLog = txResponse.logs[0]
+    assert.equal(eventLog.event, 'LogErrorString', 'LogErrorString event was not emitted.')
+    const errorString = eventLog.args.errorString;
+    assert.notEqual(errorString.indexOf('Resource already exists'), -1, "Incorrect error message: " + errorString)
   })
 })

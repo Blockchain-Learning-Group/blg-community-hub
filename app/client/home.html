@@ -19,6 +19,29 @@
 
     <!-- Custom styles -->
     <link href="css/customStyle.css" rel="stylesheet">
+
+    <!-- Bootstrap table -->
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-table.min.css">
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/popper/popper.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Vendor -->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <!-- <script src="vendor/chart.js/Chart.min.js"></script> -->
+    <script src="vendor/datatables/jquery.dataTables.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.js"></script>
+
+    <script src="vendor/bootstrap/js/bootstrap-table.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap-table-locale-all.min.js"></script>
+
+    <script src="js/web3.min.js"></script>
+
+    <!-- Custom -->
+    <script src="js/guiTools.js"></script>
+    <script src="js/home.js"></script>
   </head>
 
   <body class="fixed-nav" id="page-top">
@@ -204,14 +227,14 @@
               Top Resources</div>
             <hr class="mt-2">
 
+            <!-- Top Resources -->
             <div class="col-lg-12" id="topResources">
-            <!-- <div class="card-columns"> -->
 
               <!-- Example Social Card -->
-              <div class="card mb-3">
-                <!-- <a href="#">
+              <!-- <div class="card mb-3">
+                <a href="#">
                   <img class="card-img-top img-fluid w-100" src="https://unsplash.it/700/450?image=610" alt="">
-                </a> -->
+                </a>
                 <div class="card-body">
                   <h6 class="card-title mb-1">
                     <a href="#">insert url</a>
@@ -240,7 +263,7 @@
                 <div class="card-footer small text-muted">
                   Posted 32 mins ago
                 </div>
-              </div>
+              </div> -->
 
             </div>
             <!-- /Card Columns -->
@@ -285,7 +308,9 @@
           </div>
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-bordered" width="100%" id="participantsTable" cellspacing="0">
+
+              <!-- TODO: define max height and allow over flow for scroll potentially pagination -->
+              <table id="participantsTable" class="table table-bordered" width="100%">
                 <thead>
                   <tr>
                     <th>User Name</th>
@@ -294,19 +319,11 @@
                     <th>Reputation</th>
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    <th>User Name</th>
-                    <th>Position</th>
-                    <th>Location</th>
-                    <th>Reputation</th>
-                  </tr>
-                </tfoot>
-                <tbody></tbody>
               </table>
+
             </div>
           </div>
-          <div class="card-footer small text-muted">
+          <div class="card-footer small text-muted" id="timestamp">
             Updated yesterday at 11:59 PM
           </div>
         </div>
@@ -342,23 +359,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/popper/popper.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-
-    <!-- Plugin JavaScript -->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-    <!-- <script src="vendor/chart.js/Chart.min.js"></script> -->
-    <script src="vendor/datatables/jquery.dataTables.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.js"></script>
-
-    <script src="js/home.js"></script>
-    <script src="js/web3.min.js"></script>
-
-    <script src="js/ether.js"></script>
-
   </body>
 
 </html>

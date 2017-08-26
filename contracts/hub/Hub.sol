@@ -12,7 +12,7 @@ library Hub {
   /**
    * Events
    */
-  event LogResourceAdded (address user, string resourceUrl);
+  event LogResourceAdded (address user, string resourceUrl, uint blockNumber);
   event LogUserAdded (address user);
 
   /**
@@ -66,6 +66,12 @@ library Hub {
     if (bytes(_resourceUrl).length == 0)
       return ErrorLib.messageString('Invlaid empty resource, Hub.addResource()');
 
+    // Check if this id already exists.
+    bytes32 id = keccak256(_resourceUrl);
+
+    if (_self.resources_[id].state_ != HubInterface.State_.doesNotExist)
+      return ErrorLib.messageString('Resource already exists, Hub.addResource()');
+
     // BLG not entitled to tokens for resource contribution
     if (msg.sender != _self.blg_) {
       // Mint the reward for this user
@@ -76,9 +82,18 @@ library Hub {
         return ErrorLib.messageString('Unable to mint BLG tokens, Hub.addResource()');
     }
 
-    _self.resources_.push(_resourceUrl);
+    HubInterface.Resource_ memory resource = HubInterface.Resource_({
+      url_: _resourceUrl,
+      user_: msg.sender,
+      reputation_: 0,
+      addedAt_: block.number,
+      state_: HubInterface.State_.active
+    });
 
-    LogResourceAdded(msg.sender, _resourceUrl);
+    _self.resourceIds_.push(id);
+    _self.resources_[id] = resource;
+
+    LogResourceAdded(msg.sender, _resourceUrl, block.number);
 
     return true;
   }
@@ -104,7 +119,7 @@ library Hub {
     if (msg.sender !=_self.blg_)
       return ErrorLib.messageString('msg.sender != blg, Hub.addUser()');
 
-    if (_self.userData_[_userEOA].state_ != HubInterface.State_.newUser)
+    if (_self.userData_[_userEOA].state_ != HubInterface.State_.doesNotExist)
       return ErrorLib.messageString('User already exists, Hub.addUser()');
 
     _self.users_.push(_userEOA);

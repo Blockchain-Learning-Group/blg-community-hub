@@ -9,12 +9,23 @@ app.get('/', (req, res) => {
    res.sendFile( __dirname + "/client/" + "home.html" )
 })
 
-// Hit the hub to get users
-app.get('/getUsers', async (req, res) => {
-  res.send(await etherUtils.getUsers())
+/**
+* Load all users saved in hub storage.
+ */
+app.get('/loadUsers', async (req, res) => {
+  res.send(await etherUtils.getAllUserDataAndBLGBalances())
+})
+
+/**
+ * Load all resources saved in hub storage.
+ */
+app.get('/loadResources', async (req, res) => {
+  res.send(await etherUtils.getAllResources())
 })
 
 const server = app.listen(8081, () => {
    const host = server.address().address
    const port = server.address().port
+
+   console.log('Server listening on port: ' + port)
 })

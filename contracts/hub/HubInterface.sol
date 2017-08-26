@@ -11,7 +11,8 @@ library HubInterface {
   struct Data_ {
     address blg_; // owner EOA
     address blgToken_; // token contract
-    string[] resources_; // data URLs
+    bytes32[] resourceIds_;  // hash of url used to lookup its data
+    mapping(bytes32 => Resource_) resources_;
     address[] users_; // used for user lookup and retrieval
     mapping(address => User_) userData_;
   }
@@ -23,7 +24,15 @@ library HubInterface {
     State_ state_;
   }
 
-  enum State_ { newUser, active, inactive, terminated }
+  struct Resource_ {
+    string url_;
+    address user_; // user that created this resource
+    uint reputation_; // # of likes, shares, etc.
+    uint addedAt_; // Block number when this resource was added
+    State_ state_;
+  }
+
+  enum State_ { doesNotExist, active, inactive, terminated }
 
   /**
    * @dev Initialize the hub.

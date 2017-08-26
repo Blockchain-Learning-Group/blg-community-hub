@@ -21,8 +21,8 @@ contract StaticHub is LoggingErrors {
   /**
    * Events
    */
-  event LogResourceAdded (address user, string resourceUrl);
-  event LogUserAdded (address user);
+   event LogResourceAdded (address user, string resourceUrl, uint blockNumber);
+   event LogUserAdded (address user);
 
   /**
    * @dev CONSTRUCTOR - Set the address of the _blgToken
@@ -71,12 +71,42 @@ contract StaticHub is LoggingErrors {
   /**
    * @return The array of users.
    */
-  function getUsers ()
+  function getAllUsers ()
     external
     constant
     returns(address[])
   {
     return hub_.users_;
+  }
+
+  /**
+   * @param _id The id of the resource to retrieve.
+   * @return The resource object data.
+   */
+  function getResourceById (bytes32 _id)
+    external
+    constant
+    returns(string, address, uint, uint)
+  {
+    HubInterface.Resource_ memory resource = hub_.resources_[_id];
+
+    return (
+      resource.url_,
+      resource.user_,
+      resource.reputation_,
+      resource.addedAt_
+    );
+  }
+
+  /**
+   * @return The resource ids.
+   */
+  function getResourceIds ()
+    external
+    constant
+    returns(bytes32[])
+  {
+    return hub_.resourceIds_;
   }
 
   /**
