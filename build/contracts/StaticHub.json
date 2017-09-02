@@ -466,8 +466,60 @@
         }
       },
       "updated_at": 1503769599549
+    },
+    "1504351019939": {
+      "links": {},
+      "events": {
+        "0x413d05b8bb326cef7511810161c97e50e07475497cb0c04dc8b407faf7991ab8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "resourceUrl",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "blockNumber",
+              "type": "uint256"
+            }
+          ],
+          "name": "LogResourceAdded",
+          "type": "event"
+        },
+        "0x187047b56eb20e7a0313254e37dc60b8c1a9d25707114d2caaaee420b2b7ec23": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "user",
+              "type": "address"
+            }
+          ],
+          "name": "LogUserAdded",
+          "type": "event"
+        },
+        "0x551303dd5f39cbfe6daba6b3e27754b8a7d72f519756a2cde2b92c2bbde159a7": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "errorString",
+              "type": "string"
+            }
+          ],
+          "name": "LogErrorString",
+          "type": "event"
+        }
+      },
+      "updated_at": 1504355148575
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1503769599549
+  "updated_at": 1504355148575
 }
