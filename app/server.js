@@ -23,6 +23,13 @@ app.get('/loadResources', async (req, res) => {
   res.send(await etherUtils.getAllResources())
 })
 
+/**
+ * Load 10 latest events.
+ */
+app.get('/loadEvents', async (req, res) => {
+  res.send(await etherUtils.getLatestEvents())
+})
+
 const server = app.listen(8081, () => {
    const host = server.address().address
    const port = server.address().port

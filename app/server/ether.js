@@ -19,32 +19,115 @@ const BLG = contract(blgArtifacts)
 BLG.setProvider(web3.currentProvider)
 let blgToken
 
+let allUsers
+let userData = []
+let userLookup = {}
+let loggedEvents = []
+let resources = []
+
 initHub()
 
 /**
- * Get all user data from the hub, personal info and token balances.
- * @return {Array} The user data objects, name, position, location, etc.
+ * Initialize an interface with the deployed hub.
  */
-async function getAllUserDataAndBLGBalances () {
-  const userEOAs = await getAllUsers()
-  let userData = []
-  let user
+async function initHub () {
+  if (!web3.isConnected()) throw 'Web3 is not connected!';
 
-  for (let i = 0; i < userEOAs.length; i++) {
-    user = await staticHub.getUserData.call(userEOAs[i])
-    user.push(await getBLGBalance(userEOAs[i]))
-    userData.push(user)
+  if (argv.hub) {
+    staticHub = await StaticHub.at(argv.hub)
+    console.log('Hub Initd')
   }
 
-  return userData
+  if (argv.blgToken) {
+    blgToken = await BLG.at(argv.blgToken)
+    console.log('BLG token Initd')
+  }
+
+  // Load data for rapid response to clients
+  if (staticHub && blgToken) {
+    await loadAllUsers()
+    await loadAllUserDataAndBLGBalances()
+    console.log('User data loaded.')
+
+    await loadAllResources()
+    console.log('Resources loaded.')
+
+    await createContractListeners(staticHub)
+    await createContractListeners(blgToken)
+    console.log('listeners created')
+
+    loadEvents(staticHub, 0, 'latest')
+    loadEvents(blgToken, 0, 'latest')
+
+    console.log('Server ready!')
+  }
 }
 
 /**
- * Get the users with in the hub, EOAs.
- * @return {Array} The user EOA addresses.
+ * Create listeners for all events of a given contract.
+ */
+async function createContractListeners (contract) {
+  let userInfo
+
+  contract.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch(async (err, res) => {
+    if (err) {
+      console.log(err)
+
+    } else if (res['event']) {
+      // append to list of caught events
+      loggedEvents.push(res)
+      const _event = res['event']
+
+      if (_event === 'LogResourceAdded') {
+        console.log('Resource Added')
+
+        userInfo = await staticHub.getUserData.call(res.args.user)
+        resources.push([res.args.resourceUrl, userInfo[0], 0, res.blockNumber])
+
+      } else if (_event === 'LogUserAdded')  {
+        console.log('User Added')
+
+        userInfo = await staticHub.getUserData.call(res.args.user)
+        userInfo[3] = 0
+        userData.push(userInfo)
+        userLookup[res.args.user] = userData.length - 1
+
+      } else if (_event === 'LogTokensMinted')  {
+        console.log('Tokens Minted')
+
+        // get the user an update their balance
+        const userIndex = userLookup[res.args.to]
+        userData[userIndex][3] = Number(userData[userIndex][3]) + 1 // update reputation by 1 as only mint 1 at a time
+      }
+    }
+  })
+}
+
+/**
+ * Get all user data from the hub, personal info and token balances.
+ */
+async function getAllUserDataAndBLGBalances () {
+  if (userData) {
+    return userData
+
+  } else {
+    await loadAllUserDataAndBLGBalances()
+    return userData
+  }
+}
+
+/**
+ * Get all of the active users with in the hub, EOAs.
+ * Load into mem.
  */
 async function getAllUsers () {
-  return await staticHub.getAllUsers.call()
+  if (allUsers) {
+    return allUsers
+
+  } else {
+    await loadAllUsers()
+    return allUsers
+  }
 }
 
 /**
@@ -52,19 +135,66 @@ async function getAllUsers () {
  * @return {Array} The string urls.
  */
 async function getAllResources () {
-  let resources = []
-  let userData
+  if (resources) {
+    return resources
+
+  } else {
+    await loadAllResources()
+    return resources
+  }
+}
+
+/**
+ * @return {Array} Last 10 logged events.
+ */
+function getLatestEvents() {
+  return loggedEvents.slice(loggedEvents.length - 11, -1)
+}
+
+/**
+ * Load all user data from the hub into memory.
+ * Set the user data array to be utilized through out.
+ */
+async function loadAllUserDataAndBLGBalances () {
+  let user
+
+  for (let i = 0; i < allUsers.length; i++) {
+    user = await staticHub.getUserData.call(allUsers[i])
+    user.push(await getBLGBalance(allUsers[i]))
+    userData.push(user)
+
+    userLookup[allUsers[i]] = userData.length - 1// lookup to update token balance later
+  }
+}
+
+/**
+ * Load all of the active users with in the hub, EOAs.
+ * @return {Array} The user EOA addresses.
+ */
+async function loadAllUsers () {
+  allUsers = await staticHub.getAllUsers.call()
+}
+
+/**
+ * Load all existing resources from the contract into storage.
+ */
+async function loadAllResources () {
+  let userInfo
   const resourceIds = await staticHub.getResourceIds.call()
 
   for (let i = 0; i < resourceIds.length; i++) {
     resources.push(await staticHub.getResourceById.call(resourceIds[i]))
 
     // Get the actual user name not their address
-    userData = await staticHub.getUserData.call(resources[i][1])
-    resources[i][1] = userData[0]
+    userInfo = await staticHub.getUserData.call(resources[i][1])
+    resources[i][1] = userInfo[0]
   }
+}
 
-  return resources
+async function loadEvents(contract, from, to) {
+  contract.allEvents({ fromBlock: from, toBlock: to }).get((err, events) => {
+    loggedEvents = loggedEvents.concat(events)
+  })
 }
 
 /**
@@ -84,23 +214,9 @@ async function getBLGBalance (user) {
   return balance
 }
 
-/**
- * Initialize an interface with the deployed hub.
- */
-async function initHub () {
-  if (!web3.isConnected()) throw 'Web3 is not connected!';
-
-  if (argv.hub) {
-    staticHub = await StaticHub.at(argv.hub)
-  }
-
-  if (argv.blgToken) {
-    blgToken = await BLG.at(argv.blgToken)
-  }
-}
-
 
 module.exports = {
   getAllResources,
   getAllUserDataAndBLGBalances,
+  getLatestEvents,
 }

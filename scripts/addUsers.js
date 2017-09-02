@@ -36,6 +36,42 @@ const users = [
     userName: 'Jordan Welsh',
     position: 'Lawyer',
     location: 'Sydney, AU'
+  },
+  {
+    EOA: web3.eth.accounts[4],
+    userName: 'Adam Lemmon1',
+    position: 'Engineer',
+    location: 'London, UK'
+  },
+  {
+    EOA: web3.eth.accounts[5],
+    userName: 'Mur Tawawala1',
+    position: 'Marketing',
+    location: 'Toronto, CA'
+  },
+  {
+    EOA: web3.eth.accounts[6],
+    userName: 'Jordan Welsh1',
+    position: 'Lawyer',
+    location: 'Sydney, AU'
+  },
+  {
+    EOA: web3.eth.accounts[7],
+    userName: 'Jordan Welsh2',
+    position: 'Lawyer',
+    location: 'Sydney, AU'
+  },
+  {
+    EOA: web3.eth.accounts[8],
+    userName: 'Adam Lemmon2',
+    position: 'Engineer',
+    location: 'London, UK'
+  },
+  {
+    EOA: web3.eth.accounts[9],
+    userName: 'Mur Tawawala2',
+    position: 'Marketing',
+    location: 'Toronto, CA'
   }
 ]
 

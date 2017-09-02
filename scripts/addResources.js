@@ -8,7 +8,18 @@ const hubArtifacts = require('../build/contracts/StaticHub.json')
 const StaticHub = contract(hubArtifacts)
 StaticHub.setProvider(web3.currentProvider)
 const blgAccount = web3.eth.accounts[0]
-const resources = ['https://blockchainlearninggroup.com', 'https://etherscan.io']
+const resources = [
+  'https://blockchainlearninggroup.com',
+  'https://etherscan.io',
+  'https://etherscan2.io',
+  'https://etherscan3.io',
+  'https://etherscan4.io',
+  'https://etherscan5.io',
+  'https://etherscan6.io',
+  'https://etherscan7.io',
+  'https://etherscan8.io',
+  'https://etherscan9.io',
+]
 
 addResources()
 

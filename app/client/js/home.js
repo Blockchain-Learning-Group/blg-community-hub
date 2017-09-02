@@ -483,7 +483,7 @@ const staticHub = {
   "schema_version": "0.0.5",
   "updated_at": 1503769599549
 }
-const staticHubAddress = '0xb7229eb0e04a3a14fd4865e9ca60dd87ccfa10e7'
+const staticHubAddress = '0x14b92295da19f849ad1af6345400f8c96e46b7a3'
 
 const blg = {
   "contract_name": "BLG",
@@ -1227,7 +1227,7 @@ const blg = {
   "schema_version": "0.0.5",
   "updated_at": 1503769599564
 }
-const blgTokenAddress = '0xfadf6cfecab077857b0ca81250f193c35dbdff33'
+const blgTokenAddress = '0xe39cf27516a1c4bddec850d9624e73ff8625a14e'
 
 initializeApp()
 
@@ -1239,51 +1239,9 @@ async function initializeApp () {
   await initBLGAndHubContracts()
   loadAllUsers()
   loadAllResources()
-  createContractListeners()
-}
-
-/**
- * Create listeners for botht he hub and blg token.
- */
-async function createContractListeners () {
-  hub.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch((err, res) => {
-    if (err) {
-      console.log(err)
-
-    } else if (res['event']) {
-      _event = res['event']
-      listenerEventCallbacks[_event](res)
-    }
-  })
-
-  blgToken.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch((err, res) => {
-    if (err) {
-      console.log(err)
-
-    } else if (res['event']) {
-      _event = res['event']
-
-      console.log(_event)
-
-      listenerEventCallbacks[_event](res)
-    }
-  })
-}
-
-/*
- Event Callbacks
- */
-/**
- * Callback when resource added event is emitted by hub. Append the resource the
- * the resource table
- * @param  {Object} res The event log object.
- */
-async function resourceAddedCb (res) {
-  console.log('Resrouce Added!')
-  console.log(res)
-  // Get the real user name not the address
-  const userData = await hub.getUserData.call(res.args.user)
-  appendNewResource(res.args.resourceUrl, userData[0], 0, res.args.blockNumber)
+  createContractListeners(hub)
+  createContractListeners(blgToken)
+  loadNewsFeed()
 }
 
 /**
@@ -1293,35 +1251,109 @@ async function resourceAddedCb (res) {
  * @param  {Number} timestamp The time this resource was added at.
  */
 function appendNewResource (url, user, reputation, blockNumber) {
-  $('#topResources').append('<div class="card mb-3"><div class="card-body">'
-  + '<h6 class="card-title mb-1"><a href="'+ url +'">'
-  + url + '</a></h6><p class="card-text small">' + user
-  + '</p></div><hr class="my-0"><div class="card-body py-2 small">'
-  +'<a class="mr-3 d-inline-block" href="#"><strong>'+ reputation +' </strong>'
-  +'<i class="fa fa-fw fa-thumbs-up">'
-  +'</i>Like</a><a class="mr-3 d-inline-block" href="#"></div>'
-  +'<div class="card-footer small text-muted">Added at block number: '+ blockNumber +'</div></div>')
+  $('#topResources').append(
+    '<div class="card mb-3"><div class="card-body">'
+    + '<h6 class="card-title mb-1"><a href="'+ url +'">'
+    + url + '</a></h6><p class="card-text small">' + user
+    + '</p></div><hr class="my-0"><div class="card-body py-2 small">'
+    +'<a class="mr-3 d-inline-block" href="#"><strong>'+ reputation +' </strong>'
+    +'<i class="fa fa-fw fa-thumbs-up">'
+    +'</i>Like</a><a class="mr-3 d-inline-block" href="#"></div>'
+    +'<div class="card-footer small text-muted">Added at block number: '+ blockNumber +'</div></div>'
+  )
 }
 
-// TODO
-function userAddedCb (res) {
-  console.log('userAddedCb')
-  console.log(res)
+function appendNewUser(userData) {
+  $('#participantsTable').append(
+    '<tr><td>'
+    + userData[0] + '</td><td>'
+    + userData[1] + '</td><td>'
+    + userData[2] + '</td><td>'
+    + userData[3]
+    + ' BLG </td><</tr>'
+  )
 }
+
+/**
+ * Create listeners for all events of a given contract.
+ */
+async function createContractListeners (contract) {
+  contract.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch((err, res) => {
+    if (err) {
+      console.log(err)
+
+    } else if (res['event']) {
+      _event = res['event']
+      // Update newsfeed with all events then event specific callback
+      updateNewsFeed(res)
+      listenerEventCallbacks[_event](res)
+    }
+  })
+}
+
+/*
+ Event Callbacks
+ */
+function blgTokenActivatedCb (res) {
+   console.log('blgTokenActivatedCb')
+   console.log(res)
+ }
 
 function errorStringCb (res) {
-  console.log('errorStringCb')
-  console.log(res)
-}
+   console.log('errorStringCb')
+   console.log(res)
+ }
 
-function tokensMintedCb (res) {
+async function tokensMintedCb (res) {
   console.log('tokensMintedCb')
   console.log(res)
+  // Update balance of user in table
+  const userData = await hub.getUserData.call(res.args.to)
+  // TODO update cell in table for user that received the tokens
 }
 
-function blgTokenActivatedCb (res) {
-  console.log('blgTokenActivatedCb')
+/**
+ * Callback when resource added event is emitted by hub. Append the resource the
+ * the resource table
+ * @param  {Object} res The event log object.
+ */
+async function resourceAddedCb (res) {
+  // Get the real user name not the address
+  const userData = await hub.getUserData.call(res.args.user)
+  appendNewResource(res.args.resourceUrl, userData[0], 0, res.args.blockNumber)
+}
+
+async function userAddedCb (res) {
+  console.log('userAddedCb')
   console.log(res)
+  const userData = await hub.getUserData.call(res.args.user)
+  userData[3] = 0 // default to 0 blg tokens
+  appendNewUser(userData)
+}
+
+/**
+ * [initBLGAndHubContracts description]
+ */
+async function initBLGAndHubContracts () {
+  hub = await web3.eth.contract(staticHub.abi).at(staticHubAddress)
+  blgToken = await web3.eth.contract(blg.abi).at(blgTokenAddress)
+}
+
+/**
+ * Initialize the connection to an ether client.
+ */
+async function initEtherConnection () {
+  // Local Dev client connection
+  web3 = new Web3(
+    new Web3.providers.HttpProvider('http://localhost:8545')
+  );
+
+  // Deploy on Kovan testnet via infura
+  // const web3 = new Web3(
+  //   new Web3.providers.HttpProvider('https://kovan.infura.io/thMAdMI5QeIf8dirn63U')
+  // );
+
+  // console.log('wbe3 Connected? ' + web3.isConnected());
 }
 
 /**
@@ -1341,18 +1373,10 @@ async function loadAllUsers () {
        console.log('error: ' + error)
      },
      success: users => {
-       let userAttrs
+       users.sort(sortUsersByReputation);
 
        for (let i = 0; i < users.length; i++) {
-         userAttrs = users[i]
-         $('#participantsTable').append(
-           '<tr><td>'
-           + userAttrs[0] + '</td><td>'
-           + userAttrs[1] + '</td><td>'
-           + userAttrs[2] + '</td><td>'
-           + userAttrs[3]
-           + ' BLG </td><</tr>'
-         )
+         appendNewUser(users[i])
        }
      },
      type: 'GET'
@@ -1392,30 +1416,26 @@ async function loadAllResources () {
 }
 
 /**
- * [initBLGAndHubContracts description]
+ * Load newsfeed with 10 latest events.
  */
-async function initBLGAndHubContracts () {
-  hub = await web3.eth.contract(staticHub.abi).at(staticHubAddress)
-  blgToken = await web3.eth.contract(blg.abi).at(blgTokenAddress)
-}
+function loadNewsFeed() {
+  const url = 'http://localhost:8081/loadEvents'
 
-/**
- * Initialize the connection to an ether client.
- */
-async function initEtherConnection () {
-  console.log('Init ether client')
-
-  // Local Dev client connection
-  web3 = new Web3(
-    new Web3.providers.HttpProvider('http://localhost:8545')
-  );
-
-  // Deploy on Kovan testnet via infura
-  // const web3 = new Web3(
-  //   new Web3.providers.HttpProvider('https://kovan.infura.io/thMAdMI5QeIf8dirn63U')
-  // );
-
-  // console.log('wbe3 Connected? ' + web3.isConnected());
+  $.ajax({
+     url: url,
+     data: {
+        format: 'json'
+     },
+     error: err => {
+       console.log('error: ' + err)
+     },
+     success: events => {
+       for (let i = 0; i < events.length; i++) {
+         updateNewsFeed(events[i])
+       }
+     },
+     type: 'GET'
+  });
 }
 
 /**
@@ -1430,4 +1450,69 @@ function sortResourcesByReputation (a, b) {
   } else {
     return (a[2] > b[2]) ? -1 : 1;
   }
+}
+
+/**
+ * Sort the 2D array by the reputation column.
+ * @param  {[type]} a [description]
+ * @param  {[type]} b [description]
+ * @return {[type]}   [description]
+ */
+function sortUsersByReputation (a, b) {
+  if (a[3] === b[3]) {
+    return 0;
+  } else {
+    return (a[3] > b[3]) ? -1 : 1;
+  }
+}
+
+/**
+ * Prepend a new item to the newsfeed table
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+async function updateNewsFeed(data) {
+  let _event = data['event'].replace('Log', '')
+  let img
+  let args
+
+  let userData
+  if (_event === 'UserAdded') {
+    img = '<img class="d-flex mr-3 rounded-circle" src="img/userAdded.png" height="55" width="55">'
+    userData = await hub.getUserData.call(data.args.user)
+    args = 'Name: ' + userData[0] + '</br>Position: ' + userData[1] + '</br>Location: ' + userData[2]
+
+  } else if (_event === 'ResourceAdded') {
+    img = '<img class="d-flex mr-3 rounded-circle" src="img/resourceAdded.png" height="55" width="55">'
+    userData = await hub.getUserData.call(data.args.user)
+    args = data.args.resourceUrl + '</br> Added by: ' + userData[0]
+
+  } else if (_event === 'TokensMinted') {
+    img = '<img class="d-flex mr-3 rounded-circle" src="img/tokensMinted.png" height="55" width="55">'
+    userData = await hub.getUserData.call(data.args.to)
+    args = '1 BLG token minted!' + '</br> To: ' + userData[0]
+
+  } else if (_event === 'ErrorString') {
+    _event = _event.replace('String', '')
+    img = '<img class="d-flex mr-3 rounded-circle" src="img/error.png" height="55" width="55">'
+    args = '' + data.args.errorString
+
+  } else {
+    console.log('Uknown Event caught!: ' + _event)
+    return
+  }
+
+  $('#newsFeed').prepend(
+    '<a href="#" class="list-group-item list-group-item-action">'
+      +'<div class="media">'
+        + img
+        +'<div class="media-body">'
+          +'<strong>'+ data['event'].replace('Log', '') +'</strong></br>'
+          + args
+          +'<div class="text-muted smaller">Transaction: '+ data['transactionHash'].slice(0, 20) +'...</div>'
+          +'<div class="text-muted smaller">Mined at block: '+ data['blockNumber'] +'</div>'
+        +'</div>'
+      +'</div>'
+    +'</a>'
+  )
 }
