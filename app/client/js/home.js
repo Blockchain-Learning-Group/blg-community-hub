@@ -739,7 +739,7 @@ const staticHub = {
   "schema_version": "0.0.5",
   "updated_at": 1504446863362
 }
-const staticHubAddress = '0x8073c387ed6ae0bfd7ba85513ee525546bbb87f1'
+const staticHubAddress = '0x404a5b16c9c4fe9e3078d59971ee87ade70b9af6'
 
 const blg = {
   "contract_name": "BLG",
@@ -1483,7 +1483,7 @@ const blg = {
   "schema_version": "0.0.5",
   "updated_at": 1503769599564
 }
-const blgTokenAddress = '0x488a2391ec53a8345fcb15779594e8ff48ca6095'
+const blgTokenAddress = '0x2cf39c55bd26b747798a82c661da69eabaa0d4e7'
 
 initializeApp()
 
@@ -1510,9 +1510,10 @@ function appendNewResource (url, user, reputation, blockNumber) {
   // custom id for each resource
   let idUrl = url.replace('https://', '')
   idUrl = idUrl.replace('.', '')
+  idUrl = idUrl.replace(/-/g, '')
+  idUrl = idUrl.replace(/\//g, '')
 
-  const id = 'resourceLike' + idUrl
-  const reputationId = 'resourceLike' + idUrl + 'rep'
+  const reputationId = idUrl + 'rep'
 
   $('#topResources').append(
     '<div class="card mb-3">'
@@ -1527,22 +1528,26 @@ function appendNewResource (url, user, reputation, blockNumber) {
       +'<a class="mr-3 d-inline-block" id='+reputationId+'>'
         +'<strong>'+ reputation +' </strong>'
       +'</a>'
-      +'<a class="mr-3 d-inline-block" href="" name='+url+' id='+id+'>'
+      +'<a class="mr-3 d-inline-block" href="" name='+url+' id='+idUrl+'>'
         +'<i class="fa fa-fw fa-thumbs-up"></i>Like'
       +'</a>'
     +'<a class="mr-3 d-inline-block" href="#"></div>'
     +'<div class="card-footer small text-muted">Added at block number: '+ blockNumber +'</div></div>'
   )
 
-  $('#' + id).click(function(e) {
+  console.log(idUrl)
+
+  $('#' + idUrl).click(function(e) {
     e.preventDefault()
+
     // Get the user's ip, unable to like same resource continuously
     $.getJSON('http://ipinfo.io', data => {
+
       if (url in likes && data.ip in likes[url] && likes[url][data.ip]) {
         alert('You have already liked this url, thanks!')
 
       } else {
-        alert('Like transaction submitted, thanks!')
+        alert('Transaction submitted, thanks!')
         // Do this immediately to eliminate spamming likes
         if (!(url in likes)) {
           likes[url] = {}
@@ -1631,8 +1636,11 @@ async function resourceLikedCb (res) {
 
   let idUrl = url.replace('https://', '')
   idUrl = idUrl.replace('.', '')
+  idUrl = idUrl.replace(/-/g, '')
+  idUrl = idUrl.replace(/\//g, '')
 
-  const reputationId = 'resourceLike' + idUrl + 'rep'
+
+  const reputationId = idUrl + 'rep'
 
   // Update ui with new like
   const reputation = $('#' + reputationId)

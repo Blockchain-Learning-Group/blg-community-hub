@@ -1,6 +1,6 @@
 const argv = require('yargs')
-.option('hub', { description: 'Hub contract address to interface with.', type: 'string' })
-.option('blgToken', { description: 'BLG token contract address.', type: 'string' })
+.option('hub', { description: 'Hub contract address to interface with.', demand: true, type: 'string' })
+.option('blgToken', { description: 'BLG token contract address.', demand: true, type: 'string' })
 .argv
 
 const contract = require('truffle-contract')
