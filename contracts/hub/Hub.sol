@@ -2,6 +2,7 @@ pragma solidity ^0.4.11;
 
 import './HubInterface.sol';
 import '../utils/ErrorLib.sol';
+import '../utils/SafeMath.sol';
 import '../token/BLG.sol';
 
 /**
@@ -9,10 +10,13 @@ import '../token/BLG.sol';
  * @dev Upgradeable hub library.
  */
 library Hub {
+  using SafeMath for uint;
+
   /**
    * Events
    */
   event LogResourceAdded (address user, string resourceUrl, uint blockNumber);
+  event LogResourceLiked(string resourceUrl);
   event LogUserAdded (address user);
 
   /**
@@ -132,6 +136,46 @@ library Hub {
     });
 
     LogUserAdded(_userEOA);
+
+    return true;
+  }
+
+  /**
+   * @dev A resource has been liked.
+   * @param  _self The contract storage reference.
+   * @param _resourceUrl The url of the liked resource.
+   * @return Success of the transaction.
+   */
+  function likeResource (
+    HubInterface.Data_ storage _self,
+    string _resourceUrl
+  ) external
+    returns (bool)
+  {
+    // All likes sent from blg owned account
+    if (msg.sender != _self.blg_)
+      return ErrorLib.messageString('msg.sender != blg, Hub.likeResource()');
+
+    // Get resource info.
+    bytes32 id = keccak256(_resourceUrl);
+    HubInterface.Resource_ memory resource = _self.resources_[id];
+
+    if (resource.state_ == HubInterface.State_.doesNotExist)
+      return ErrorLib.messageString('Resource does not exist, Hub.likeResource()');
+
+    // BLG not entitled to tokens for resource contribution
+    if (resource.user_ != _self.blg_) {
+      bool minted = BLG(_self.blgToken_).mint(resource.user_, 1);
+
+      if (!minted)
+        return ErrorLib.messageString('Unable to mint BLG tokens, Hub.likeResource()');
+    }
+
+    // Update rep and write to storage
+    resource.reputation_ = resource.reputation_.add(1);
+    _self.resources_[id] = resource;
+
+    LogResourceLiked(_resourceUrl);
 
     return true;
   }

@@ -22,6 +22,7 @@ contract StaticHub is LoggingErrors {
    * Events
    */
    event LogResourceAdded (address user, string resourceUrl, uint blockNumber);
+   event LogResourceLiked(string resourceUrl);
    event LogUserAdded (address user);
 
   /**
@@ -68,6 +69,19 @@ contract StaticHub is LoggingErrors {
     return hub_.addResource(_resourceUrl);
   }
 
+  /**
+   * @dev Like an existing resource to within the hub.
+   * @param _resourceUrl The url of the resource to be liked.
+   * @return Success of the transaction.
+   */
+  function likeResource (string _resourceUrl)
+    external
+    returns (bool)
+  {
+    return hub_.likeResource(_resourceUrl);
+  }
+
+  // CONSTANTS
   /**
    * @return The array of users.
    */

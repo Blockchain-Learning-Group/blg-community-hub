@@ -13,6 +13,28 @@
           "type": "string"
         }
       ],
+      "name": "likeResource",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_self",
+          "type": "HubInterface.Data_ storage"
+        },
+        {
+          "name": "_resourceUrl",
+          "type": "string"
+        }
+      ],
       "name": "addResource",
       "outputs": [
         {
@@ -73,10 +95,56 @@
       "outputs": [],
       "payable": false,
       "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "resourceUrl",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "LogResourceAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "resourceUrl",
+          "type": "string"
+        }
+      ],
+      "name": "LogResourceLiked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "LogUserAdded",
+      "type": "event"
     }
   ],
   "unlinked_binary": "0x",
   "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1504355147223
+  "updated_at": 1504448203312
 }

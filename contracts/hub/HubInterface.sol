@@ -35,6 +35,13 @@ library HubInterface {
   enum State_ { doesNotExist, active, inactive, terminated }
 
   /**
+   * EVents
+   */
+  event LogResourceAdded (address user, string resourceUrl, uint blockNumber);
+  event LogResourceLiked(string resourceUrl);
+  event LogUserAdded (address user);
+
+  /**
    * @dev Initialize the hub.
    * @param _self The contract storage reference.
    * @param _blgToken The blg token contract.
@@ -51,6 +58,18 @@ library HubInterface {
    * @return Success of the transaction.
    */
   function addResource (
+    Data_ storage _self,
+    string _resourceUrl
+  ) public
+    returns(bool);
+
+  /**
+   * @dev Like a resource within the hub.
+   * @param  _self The contract storage reference.
+   * @param _resourceUrl The url of the liked resource.
+   * @return Success of the transaction.
+   */
+  function likeResource (
     Data_ storage _self,
     string _resourceUrl
   ) public

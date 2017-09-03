@@ -6,6 +6,7 @@ const argv = require('yargs')
 const contract = require('truffle-contract')
 const Web3 = require('web3')
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
+const blgAccount = web3.eth.accounts[0]
 
 // Hub
 const hubArtifacts = require('../../build/contracts/StaticHub.json')
@@ -19,11 +20,13 @@ const BLG = contract(blgArtifacts)
 BLG.setProvider(web3.currentProvider)
 let blgToken
 
+// Local vars
 let allUsers
 let userData = []
 let userLookup = {}
 let loggedEvents = []
 let resources = []
+let likes = {}
 
 initHub()
 
@@ -47,17 +50,17 @@ async function initHub () {
   if (staticHub && blgToken) {
     await loadAllUsers()
     await loadAllUserDataAndBLGBalances()
-    console.log('User data loaded.')
-
     await loadAllResources()
-    console.log('Resources loaded.')
-
     await createContractListeners(staticHub)
     await createContractListeners(blgToken)
-    console.log('listeners created')
 
+    // Testing
     loadEvents(staticHub, 0, 'latest')
     loadEvents(blgToken, 0, 'latest')
+
+    // Kovan
+    // loadEvents(staticHub, 3500000, 'latest')
+    // loadEvents(blgToken, 3500000, 'latest')
 
     console.log('Server ready!')
   }
@@ -71,30 +74,34 @@ async function createContractListeners (contract) {
 
   contract.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch(async (err, res) => {
     if (err) {
-      console.log(err)
+      console.error(err)
 
     } else if (res['event']) {
       // append to list of caught events
       loggedEvents.push(res)
       const _event = res['event']
+      console.log('\n*** New Event: ' + _event + ' ***')
+      console.log(res)
+      console.log('\n')
 
       if (_event === 'LogResourceAdded') {
-        console.log('Resource Added')
-
         userInfo = await staticHub.getUserData.call(res.args.user)
         resources.push([res.args.resourceUrl, userInfo[0], 0, res.blockNumber])
 
-      } else if (_event === 'LogUserAdded')  {
-        console.log('User Added')
+      } else if (_event === 'LogResourceLiked')  {
+        // find which resource matches the url and update its reputation
+        for (let i = 0; i < resources.length; i++) {
+          if (resources[i][0] == res.args.resourceUrl)
+            resources[i][2] = Number(resources[i][2]) + 1
+        }
 
+      } else if (_event === 'LogUserAdded')  {
         userInfo = await staticHub.getUserData.call(res.args.user)
         userInfo[3] = 0
         userData.push(userInfo)
         userLookup[res.args.user] = userData.length - 1
 
       } else if (_event === 'LogTokensMinted')  {
-        console.log('Tokens Minted')
-
         // get the user an update their balance
         const userIndex = userLookup[res.args.to]
         userData[userIndex][3] = Number(userData[userIndex][3]) + 1 // update reputation by 1 as only mint 1 at a time
@@ -145,10 +152,60 @@ async function getAllResources () {
 }
 
 /**
+ * Get the BLG token balance of a user
+ * @param  {Address} user User EOA, id that owns tokens.
+ * @return {Number}  Balance of BLG tokens.
+ */
+async function getBLGBalance (user) {
+  let balance = 0
+
+  try {
+    balance = await blgToken.balanceOf.call(user)
+  } catch (error) {
+    console.log('User has 0 balance in blg token contract.')
+  }
+
+  return balance
+}
+
+
+/**
  * @return {Array} Last 10 logged events.
  */
 function getLatestEvents() {
-  return loggedEvents.slice(loggedEvents.length - 11, -1)
+  if (loggedEvents.length >= 11)
+    return loggedEvents.slice(loggedEvents.length - 11, -1)
+
+  else
+    return loggedEvents
+}
+
+/**
+ * A resource was liked within the ui.
+ * @param  {String} resource The url string that was liked.
+ * @param  {String} ip  The ip of the user that liked the resource.
+ * @return {Boolean} Success of this transaction.
+ */
+async function likeResource(resource, ip) {
+  // User has already liked this resource
+  if (resource in likes && ip in likes[resource] && likes[resource][ip]) {
+    return false
+
+  // Test call
+  } else if (!(await staticHub.likeResource.call(resource, { from: blgAccount }))) {
+    return false
+
+  } else {
+    if (!(resource in likes))
+      likes[resource] = {}
+
+    likes[resource][ip] = true
+
+    // send tx
+    await staticHub.likeResource(resource, { from: blgAccount, gas: 4e6 })
+
+    return true
+  }
 }
 
 /**
@@ -191,32 +248,25 @@ async function loadAllResources () {
   }
 }
 
+/**
+ * Load all events emitted by the given contract from block and to block
+ * @param  {Contract} contract Contract instance.
+ * @param  {Integer} from  The block to start looking for events from.
+ * @param  {Integer} to  The block to look for events to, may be 'latest'.
+ * @return {[type]}          [description]
+ */
 async function loadEvents(contract, from, to) {
   contract.allEvents({ fromBlock: from, toBlock: to }).get((err, events) => {
+    if (err)
+      console.error(err)
+
     loggedEvents = loggedEvents.concat(events)
   })
 }
-
-/**
- * Get the BLG token balance of a user
- * @param  {Address} user User EOA, id that owns tokens.
- * @return {Number}  Balance of BLG tokens.
- */
-async function getBLGBalance (user) {
-  let balance = 0
-
-  try {
-    balance = await blgToken.balanceOf.call(user)
-  } catch (error) {
-    console.log('User has 0 balance in blg token contract.')
-  }
-
-  return balance
-}
-
 
 module.exports = {
   getAllResources,
   getAllUserDataAndBLGBalances,
   getLatestEvents,
+  likeResource
 }
