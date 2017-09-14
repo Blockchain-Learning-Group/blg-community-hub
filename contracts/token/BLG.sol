@@ -21,6 +21,7 @@ contract BLG is ERC20, LoggingErrors {
   string public constant NAME = 'BLG';
   uint256 public totalSupply_;
   mapping (address => uint256) public balances_;
+  mapping(address => mapping (address => uint256)) public allowed_;
 
   address public blg_; // EOA
   address public blgHub_; // hub contract
@@ -44,6 +45,28 @@ contract BLG is ERC20, LoggingErrors {
   /**
    * External
    */
+
+   /**
+    * @dev Approve a user to spend your tokens.
+    * @param _spender The user to spend your tokens.
+    * @param _amount The amount to increase the spender's allowance by. Totaling
+    * the amount of tokens they may spend on the senders behalf.
+    * @return The success of this method.
+    */
+   function approve(address _spender, uint256 _amount)
+     external
+     returns (bool)
+   {
+     if (_amount <= 0)
+       return error('Can not approve an amount <= 0, BLG.approve()');
+
+     if (_amount > balances_[msg.sender])
+       return error('Amount is greater than senders balance, BLG.approve()');
+
+     allowed_[msg.sender][_spender] = allowed_[msg.sender][_spender].add(_amount);
+
+     return true;
+   }
 
   /**
    * @dev Mint tokens and allocate them to the specified user.
@@ -118,6 +141,34 @@ contract BLG is ERC20, LoggingErrors {
     balances_[_to] = balances_[_to].add(_value);
 
     Transfer(msg.sender, _to, _value);
+
+    return true;
+  }
+
+  /**
+   * @param _from The address transferring from.
+   * @param _to The address transferring to.
+   * @param _amount The amount to transfer.
+   * @return The success of this method.
+   */
+  function transferFrom(address _from, address _to, uint256 _amount)
+    external
+    returns (bool)
+  {
+    if (_amount <= 0)
+      return error('Cannot transfer amount <= 0, BLG.transferFrom()');
+
+    if (_amount > balances_[_from])
+      return error('From account has an insufficient balance, BLG.transferFrom()');
+
+    if (_amount > allowed_[_from][msg.sender])
+      return error('msg.sender has insufficient allowance, BLG.transferFrom()');
+
+    balances_[_from] = balances_[_from].sub(_amount);
+    allowed_[_from][msg.sender] = allowed_[_from][msg.sender].sub(_amount);
+    balances_[_to] = balances_[_to].add(_amount);
+
+    Transfer(_from, _to, _amount);
 
     return true;
   }

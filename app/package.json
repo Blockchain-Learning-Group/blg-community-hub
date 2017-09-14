@@ -5,7 +5,8 @@
   "private:": false,
   "dependencies": {
     "express": "^4.15.4",
-    "web3": "0.20.0"
+    "web3": "0.20.0",
+    "yargs": "^8.0.2"
   },
   "scripts": {
     "start": "node ./server.js",

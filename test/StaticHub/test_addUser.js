@@ -28,8 +28,12 @@ contract('StaticHub.addUser()', accounts => {
     const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
     const staticHub = hubAndBlgContracts[0]
 
+    console.log(staticHub)
+
     callResponse = await staticHub.addUser.call(user1, name, position, location, { from: user1 })
     txResponse = await staticHub.addUser(user1, name, position, location, { from: user1 })
+
+    console.log(callResponse)
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')

@@ -33,6 +33,11 @@ async function deployHub (blgAccount) {
 
   const blg = await BLG.new({ from: blgAccount })
 
+  console.log('about to deploy new hub!!')
+  console.log('about to deploy new hub!!')
+  console.log('about to deploy new hub!!')
+  console.log('about to deploy new hub!!')
+
   const staticHub = await StaticHub.new(blg.address, { from: blgAccount })
 
   await blg.setBLGHub(staticHub.address)

@@ -80,7 +80,7 @@ library Hub {
     if (msg.sender != _self.blg_) {
       // Mint the reward for this user
       /* TODO consider dynamic rewards? */
-      bool minted = BLG(_self.blgToken_).mint(msg.sender, 1);
+      bool minted = BLG(_self.blgToken_).mint(msg.sender, 1000);
 
       if (!minted)
         return ErrorLib.messageString('Unable to mint BLG tokens, Hub.addResource()');
@@ -120,6 +120,8 @@ library Hub {
   ) external
     returns (bool)
   {
+    return false;
+
     if (msg.sender !=_self.blg_)
       return ErrorLib.messageString('msg.sender != blg, Hub.addUser()');
 

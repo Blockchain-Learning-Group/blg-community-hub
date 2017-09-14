@@ -5,58 +5,137 @@ const Relay = artifacts.require('./Relay.sol')
 const RelayStorage = artifacts.require('./RelayStorage.sol')
 const BLG = artifacts.require('./BLG.sol')
 const blgAccount = web3.eth.accounts[0]
+let relayStorage
 
-module.exports = async deployer => {
-  await deployer.deploy(ErrorLib, { from: blgAccount, gas: 4e6 })
+// NOTE do not make method async as truffle will not resolve when utilizing .deployed()
+module.exports = deployer => {
 
-  deployer.link(ErrorLib, Hub)
-  await deployer.deploy(Hub, { from: blgAccount, gas: 4e6 })
+  deployer.deploy(ErrorLib, { from: blgAccount, gas: 4e6 })
+  .then(() => {
+    return deployer.link(ErrorLib, Hub)
 
-  const hub = await Hub.deployed()
+  }).then(() => {
+    return deployer.deploy(Hub, { from: blgAccount, gas: 4e6 })
 
-  await deployer.deploy(RelayStorage, hub.address, { from: blgAccount, gas: 4e6 })
-  const relayStorage = await RelayStorage.deployed()
+  }).then(() => {
+    return deployer.deploy(RelayStorage, Hub.address, { from: blgAccount, gas: 4e6 })
 
-  // Add all exposed methods to the relay storage
-  await relayStorage.addReturnDataSize(
-    'init(HubInterface.Data_ storage,address)',
-    0,
-    { from: blgAccount, gas: 4e6 }
-  )
+  }).then(() => {
+    return RelayStorage.deployed()
 
-  await relayStorage.addReturnDataSize(
-    'addResource(HubInterface.Data_ storage,string)',
-    32,
-    { from: blgAccount, gas: 4e6 }
-  )
+  }).then(_relayStorage => {
+    relayStorage = _relayStorage
+    return relayStorage.addReturnDataSize('init(HubInterface.Data_ storage,address)', 0, { from: blgAccount, gas: 4e6 })
 
-  await relayStorage.addReturnDataSize(
-    'likeResource(HubInterface.Data_ storage,string)',
-    32,
-    { from: blgAccount, gas: 4e6 }
-  )
+  }).then(() => {
+    return relayStorage.addReturnDataSize('addResource(HubInterface.Data_ storage,string)', 32, { from: blgAccount, gas: 4e6 })
 
-  await relayStorage.addReturnDataSize(
-    'addUser(HubInterface.Data_ storage,address,string,string,string)',
-    32,
-    { from: blgAccount, gas: 4e6 }
-  )
+  }).then(() => {
+    return relayStorage.addReturnDataSize('likeResource(HubInterface.Data_ storage,string)', 32, { from: blgAccount, gas: 4e6 })
 
-  Relay.unlinked_binary = Relay.unlinked_binary.replace(
-    '1111222233334444555566667777888899990000',
-    relayStorage.address.slice(2)
-  )
+  }).then(() => {
+    return relayStorage.addReturnDataSize(
+      'addUser(deployHubdeployHubHubInterface.Data_ storage,address,string,string,string)',
+      32,
+      { from: blgAccount, gas: 4e6 }
+    )
 
-  await deployer.deploy(Relay, { from: blgAccount, gas: 4e6 })
-  const relay = await Relay.deployed()
+  }).then(() => {
+    Relay.unlinked_binary = Relay.unlinked_binary.replace(
+      '1111222233334444555566667777888899990000',
+      relayStorage.address.slice(2)
+    )
 
-  StaticHub.link('HubInterface', relay.address)
+    return deployer.deploy(Relay, { from: blgAccount, gas: 4e6 })
 
-  await deployer.deploy(BLG, { from: blgAccount, gas: 4e6 })
-  const blg = await BLG.deployed()
+  }).then(() => {
+    return deployer.deploy(BLG, { from: blgAccount, gas: 4e6 })
 
-  await deployer.deploy(StaticHub, blg.address, { from: blgAccount, gas: 4e6 })
-  const staticHub = await StaticHub.deployed()
+  }).then(() => {
+    StaticHub.link('HubInterface', Relay.address)
+    return deployer.deploy(StaticHub, BLG.address, { from: blgAccount, gas: 4e6 })
+    return deployer.deploy(StaticHub, { from: blgAccount, gas: 4e6 })
 
-  await blg.setBLGHub(staticHub.address, { from: blgAccount, gas: 4e6 })
+  })
+
+
+
+
+
+
+  //
+  // StaticHub.link('HubInterface', relay.address);
+  //
+  // const blg = await BLG.new({ from: blgAccount })
+  //
+  // const staticHub = await StaticHub.new(blg.address, { from: blgAccount })
+  //
+  // await blg.setBLGHub(staticHub.address)
+
+
+
+
+  // deployer.deploy(ErrorLib, { from: blgAccount, gas: 4e6 })
+  // .then(() => {
+  //   return deployer.link(ErrorLib, Hub)
+  //
+  // }).then(() => {
+  //   return deployer.deploy(Hub, { from: blgAccount, gas: 4e6 })
+  //
+  // }).then(() => {
+  //   return deployer.deploy(RelayStorage, Hub.address, { from: blgAccount, gas: 4e6 })
+  //
+  // }).then(() => {
+  //   return RelayStorage.deployed()
+  //
+  // }).then(relayStorage => {
+  //     // Add all exposed methods to the relay storage
+  //     relayStorage.addReturnDataSize(
+  //       'init(HubInterface.Data_ storage,address)',
+  //       0,
+  //       { from: blgAccount, gas: 4e6 }
+  //     )
+  //
+  //     relayStorage.addReturnDataSize(
+  //       'addResource(HubInterface.Data_ storage,string)',
+  //       32,
+  //       { from: blgAccount, gas: 4e6 }
+  //     )
+  //
+  //     relayStorage.addReturnDataSize(
+  //       'likeResource(HubInterface.Data_ storage,string)',
+  //       32,
+  //       { from: blgAccount, gas: 4e6 }
+  //     )
+  //
+  //     relayStorage.addReturnDataSize(
+  //       'addUser(HubInterface.Data_ storage,address,string,string,string)',
+  //       32,
+  //       { from: blgAccount, gas: 4e6 }
+  //     )
+  //
+  //     Relay.unlinked_binary = Relay.unlinked_binary.replace(
+  //       '1111222233334444555566667777888899990000',
+  //       relayStorage.address.slice(2)
+  //     )
+  //
+  //     return
+  //
+  // }).then(() => {
+  //   return deployer.deploy(Relay, { from: blgAccount, gas: 4e6 })
+  //
+  // }).then(() => {
+  //   return StaticHub.link('HubInterface', Relay.address)
+  //
+  // }).then(() => {
+  //   return deployer.deploy(BLG, { from: blgAccount, gas: 4e6 })
+  //
+  // }).then(() => {
+  //   return deployer.deploy(StaticHub, BLG.address, { from: blgAccount, gas: 4e6 })
+  //
+  // }).then(() => {
+  //   // BLG.deployed().then(blg => {
+  //   //   blg.setBLGHub(StaticHub.address, { from: blgAccount, gas: 4e6 })
+  //   // })
+  // })
 }

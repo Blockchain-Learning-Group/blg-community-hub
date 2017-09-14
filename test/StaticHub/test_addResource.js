@@ -35,10 +35,10 @@ contract('StaticHub.addResource()', accounts => {
 
     // Check user's token balance increased as well as the total supply
     const balance = await blgToken.balanceOf.call(user1)
-    assert.equal(balance.toNumber(), 1, 'User did not receive correct amount of BLG tokens')
+    assert.equal(balance.toNumber(), 1000, 'User did not receive correct amount of BLG tokens')
 
     const totalSupply = await blgToken.totalSupply.call(user1)
-    assert.equal(totalSupply.toNumber(), 1, 'Total supply of BLG tokens is incorrect')
+    assert.equal(totalSupply.toNumber(), 1000, 'Total supply of BLG tokens is incorrect')
   })
 
   it("should add a new resource but NOT allocate tokens when sent form BLG.", async () => {
