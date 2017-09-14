@@ -1,4 +1,5 @@
-const etherUtils = require('../../utils/ether')
+const Hub = artifacts.require("./Hub.sol")
+const BLG = artifacts.require("./BLG.sol")
 let callResponse
 let txResponse
 
@@ -11,14 +12,14 @@ contract('StaticHub.getUsers()', accounts => {
   const location = 'location'
 
   it("should return an array of users.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
+    await hub.addUser(user2, name, position, location, { from: blgAccount })
 
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
-    await staticHub.addUser(user2, name, position, location, { from: blgAccount })
-
-    callResponse = await staticHub.getAllUsers.call()
+    callResponse = await hub.getAllUsers.call()
 
     assert.equal(callResponse.length, 2, 'Call response was incorrect length.')
     assert.equal(callResponse[0], user1, 'user1 incorrect.')

@@ -1,12 +1,9 @@
-const StaticHub = artifacts.require("./StaticHub.sol")
-const Relay = artifacts.require("./Relay.sol")
 const Hub = artifacts.require("./Hub.sol")
-const HubV2 = artifacts.require("./HubV2.sol")
-const etherUtils = require('../../utils/ether')
+const BLG = artifacts.require("./BLG.sol")
 let callResponse
 let txResponse
 
-contract('StaticHub.addResource()', accounts => {
+contract('Hub.addResource()', accounts => {
   const blgAccount = accounts[0]
   const user1 = accounts[1]
   const name= 'adam'
@@ -14,15 +11,16 @@ contract('StaticHub.addResource()', accounts => {
   const location = 'london'
 
   it("should add a new resource and allocte tokens to the sender.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
-    const blgToken = hubAndBlgContracts[1]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
+
     let resource = 'https://github.com'
 
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
 
-    callResponse = await staticHub.addResource.call(resource, { from: user1 })
-    txResponse = await staticHub.addResource(resource, { from: user1 })
+    callResponse = await hub.addResource.call(resource, { from: user1 })
+    txResponse = await hub.addResource(resource, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(callResponse, 'Call response was not true.')
@@ -42,16 +40,16 @@ contract('StaticHub.addResource()', accounts => {
   })
 
   it("should add a new resource but NOT allocate tokens when sent form BLG.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
-    const blgToken = hubAndBlgContracts[1]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
-    await staticHub.addUser(blgAccount, name, position, location, { from: blgAccount })
+    await hub.addUser(blgAccount, name, position, location, { from: blgAccount })
 
     let resource = 'https://github.com'
 
-    callResponse = await staticHub.addResource.call(resource, { from: blgAccount })
-    txResponse = await staticHub.addResource(resource, { from: blgAccount })
+    callResponse = await hub.addResource.call(resource, { from: blgAccount })
+    txResponse = await hub.addResource(resource, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(callResponse, 'Call response was not true.')
@@ -71,14 +69,15 @@ contract('StaticHub.addResource()', accounts => {
   })
 
   it("should return false and emit LogErrorString when empty resource submitted.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
 
     let resource = ''
 
-    callResponse = await staticHub.addResource.call(resource, { from: user1 })
-    txResponse = await staticHub.addResource(resource, { from: user1 })
+    callResponse = await hub.addResource.call(resource, { from: user1 })
+    txResponse = await hub.addResource(resource, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')
@@ -91,15 +90,16 @@ contract('StaticHub.addResource()', accounts => {
   })
 
   it("should return false and emit LogErrorString when sent from invalid user.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
     // User not added!
 
     let resource = 'github.com'
 
-    callResponse = await staticHub.addResource.call(resource, { from: user1 })
-    txResponse = await staticHub.addResource(resource, { from: user1 })
+    callResponse = await hub.addResource.call(resource, { from: user1 })
+    txResponse = await hub.addResource(resource, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')
@@ -112,17 +112,17 @@ contract('StaticHub.addResource()', accounts => {
   })
 
   it("should return false and emit LogErrorString when resource already exists.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
-    const blgToken = hubAndBlgContracts[1]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
     let resource = 'https://github.com'
 
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
-    await staticHub.addResource(resource, { from: user1 })
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
+    await hub.addResource(resource, { from: user1 })
 
     // add the resource again
-    callResponse = await staticHub.addResource.call(resource, { from: user1 })
-    txResponse = await staticHub.addResource(resource, { from: user1 })
+    callResponse = await hub.addResource.call(resource, { from: user1 })
+    txResponse = await hub.addResource(resource, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')

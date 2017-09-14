@@ -1,4 +1,5 @@
-const etherUtils = require('../../utils/ether')
+const Hub = artifacts.require("./Hub.sol")
+const BLG = artifacts.require("./BLG.sol")
 let callResponse
 let txResponse
 
@@ -13,19 +14,20 @@ contract('StaticHub.getResources()', accounts => {
   const resource2 = 'resource2'
 
   it("should return an array of resources.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
     let resources = []
 
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
-    await staticHub.addUser(user2, name, position, location, { from: blgAccount })
-    await staticHub.addResource(resource1, { from: user1 })
-    await staticHub.addResource(resource2, { from: user2 })
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
+    await hub.addUser(user2, name, position, location, { from: blgAccount })
+    await hub.addResource(resource1, { from: user1 })
+    await hub.addResource(resource2, { from: user2 })
 
-    let resourceIds = await staticHub.getResourceIds.call()
+    let resourceIds = await hub.getResourceIds.call()
 
     for (let i = 0; i < resourceIds.length; i++) {
-      resources.push(await staticHub.getResourceById.call(resourceIds[i]))
+      resources.push(await hub.getResourceById.call(resourceIds[i]))
     }
 
     assert.equal(resourceIds.length, 2, 'Call response was incorrect length.')

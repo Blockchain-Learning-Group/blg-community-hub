@@ -1,4 +1,5 @@
-const etherUtils = require('../../utils/ether')
+const Hub = artifacts.require("./Hub.sol")
+const BLG = artifacts.require("./BLG.sol")
 let callResponse
 let txResponse
 
@@ -10,11 +11,12 @@ contract('StaticHub.addUser()', accounts => {
   const location = 'london'
 
   it("should add a new user to the hub.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
-    callResponse = await staticHub.addUser.call(user1, name, position, location, { from: blgAccount })
-    txResponse = await staticHub.addUser(user1, name, position, location, { from: blgAccount })
+    callResponse = await hub.addUser.call(user1, name, position, location, { from: blgAccount })
+    txResponse = await hub.addUser(user1, name, position, location, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(callResponse, 'Call response was not true.')
@@ -25,15 +27,12 @@ contract('StaticHub.addUser()', accounts => {
   })
 
   it("should return false and emit LogErrorString when not from blg.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
-    console.log(staticHub)
-
-    callResponse = await staticHub.addUser.call(user1, name, position, location, { from: user1 })
-    txResponse = await staticHub.addUser(user1, name, position, location, { from: user1 })
-
-    console.log(callResponse)
+    callResponse = await hub.addUser.call(user1, name, position, location, { from: user1 })
+    txResponse = await hub.addUser(user1, name, position, location, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')
@@ -46,13 +45,14 @@ contract('StaticHub.addUser()', accounts => {
   })
 
   it("should return false and emit LogErrorString when user already exists.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
 
-    callResponse = await staticHub.addUser.call(user1, name, position, location, { from: blgAccount })
-    txResponse = await staticHub.addUser(user1, name, position, location, { from: blgAccount })
+    callResponse = await hub.addUser.call(user1, name, position, location, { from: blgAccount })
+    txResponse = await hub.addUser(user1, name, position, location, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')

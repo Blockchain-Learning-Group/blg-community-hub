@@ -1,8 +1,5 @@
-const StaticHub = artifacts.require("./StaticHub.sol")
-const Relay = artifacts.require("./Relay.sol")
 const Hub = artifacts.require("./Hub.sol")
-const HubV2 = artifacts.require("./HubV2.sol")
-const etherUtils = require('../../utils/ether')
+const BLG = artifacts.require("./BLG.sol")
 const ethABI = require('ethereumjs-abi')
 const ethUtil = require('ethereumjs-util')
 let callResponse
@@ -15,17 +12,17 @@ contract('StaticHub.likeResource()', accounts => {
   const position = 'engineer'
   const location = 'london'
 
-  it("should add like a resource and allocte tokens to the owner of the resource if not blg.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
-    const blgToken = hubAndBlgContracts[1]
+  it("should like a resource and allocte tokens to the owner of the resource if not blg.", async () => {
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
     let resource = 'https://github.com'
 
-    await staticHub.addUser(user1, name, position, location, { from: blgAccount })
-    await staticHub.addResource(resource, { from: user1 })
+    await hub.addUser(user1, name, position, location, { from: blgAccount })
+    await hub.addResource(resource, { from: user1 })
 
-    callResponse = await staticHub.likeResource.call(resource, { from: blgAccount })
-    txResponse = await staticHub.likeResource(resource, { from: blgAccount })
+    callResponse = await hub.likeResource.call(resource, { from: blgAccount })
+    txResponse = await hub.likeResource(resource, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(callResponse, 'Call response was not true.')
@@ -46,27 +43,28 @@ contract('StaticHub.likeResource()', accounts => {
     const hashHex = ethUtil.bufferToHex(hashBuff);
 
     // Check user's token balance increased as well as the total supply
-    const resourceData = await staticHub.getResourceById.call(hashHex)
+    const resourceData = await hub.getResourceById.call(hashHex)
 
     // Reputation now == 1
-    assert.equal(resourceData[2], 1, 'Resource rep is incorrect.')
+    assert.equal(resourceData[2].toNumber(), 10, 'Resource rep is incorrect.')
 
     const balance = await blgToken.balanceOf.call(resourceData[1])
-    assert.equal(balance.toNumber(), 2, 'User did not receive correct amount of BLG tokens')
+    assert.equal(balance.toNumber(), 1010, 'User did not receive correct amount of BLG tokens')
 
     const totalSupply = await blgToken.totalSupply.call(user1)
-    assert.equal(totalSupply.toNumber(), 2, 'Total supply of BLG tokens is incorrect')
+    assert.equal(totalSupply.toNumber(), 1010, 'Total supply of BLG tokens is incorrect')
   })
 
   it("should return false and emit LogErrorString when sent from invalid user.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
     // User not added!
     let resource = 'github.com'
 
-    callResponse = await staticHub.likeResource.call(resource, { from: user1 })
-    txResponse = await staticHub.likeResource(resource, { from: user1 })
+    callResponse = await hub.likeResource.call(resource, { from: user1 })
+    txResponse = await hub.likeResource(resource, { from: user1 })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')
@@ -79,14 +77,15 @@ contract('StaticHub.likeResource()', accounts => {
   })
 
   it("should return false and emit LogErrorString when resource does not exist.", async () => {
-    const hubAndBlgContracts = await etherUtils.deployHub(blgAccount)
-    const staticHub = hubAndBlgContracts[0]
+    const blgToken = await BLG.new()
+    const hub = await Hub.new(blgToken.address)
+    blgToken.setBLGHub(hub.address)
 
     // User not added!
     let resource = ''
 
-    callResponse = await staticHub.likeResource.call(resource, { from: blgAccount })
-    txResponse = await staticHub.likeResource(resource, { from: blgAccount })
+    callResponse = await hub.likeResource.call(resource, { from: blgAccount })
+    txResponse = await hub.likeResource(resource, { from: blgAccount })
 
     // Assert after tx so we can see the emitted logs in the case of failure.
     assert(!callResponse, 'Call response was not false.')
