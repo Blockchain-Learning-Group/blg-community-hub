@@ -31,7 +31,6 @@ contract StaticHub is LoggingErrors {
    */
   function StaticHub (address _blgToken) {
     hub_.init(_blgToken);
-    /*hub_.addUser(address(0x1), 'adam', 'eng', 'london');*/
   }
 
   /**

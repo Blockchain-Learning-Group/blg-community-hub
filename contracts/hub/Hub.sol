@@ -128,6 +128,8 @@ library Hub {
     if (_self.userData_[_userEOA].state_ != HubInterface.State_.doesNotExist)
       return ErrorLib.messageString('User already exists, Hub.addUser()');
 
+
+
     _self.users_.push(_userEOA);
 
     _self.userData_[_userEOA] = HubInterface.User_({

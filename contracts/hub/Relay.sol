@@ -13,7 +13,7 @@ contract Relay {
   /**
    * @dev The fallback is invoked and effectively relays the call to the correct contract.
    */
-  function() payable {
+  function() {
     RelayStorage relayStorage = RelayStorage(0x1111222233334444555566667777888899990000);
     uint32 returnSize = relayStorage.returnSizes_(msg.sig);
     address currentLib = relayStorage.currentLib_();
