@@ -10,7 +10,10 @@
   },
   "scripts": {
     "addUsers": "node ./scripts/addUsers.js",
+    "removeUsers": "node ./scripts/removeUsers.js",
     "addResources": "node ./scripts/addResources.js",
+    "removeResources": "node ./scripts/removeResources.js",
+    "mint": "node ./scripts/mint.js",
     "testSetup": "node ./scripts/testSetup.js"
   },
   "engines": {

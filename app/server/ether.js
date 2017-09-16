@@ -6,13 +6,17 @@ const argv = require('yargs')
 const contract = require('truffle-contract')
 const Web3 = require('web3')
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
+// Deploy on Kovan testnet via infura, NOTE cannot watch events!
+// const web3 = new Web3(
+//   new Web3.providers.HttpProvider('https://kovan.infura.io/thMAdMI5QeIf8dirn63U')
+// );
 const blgAccount = web3.eth.accounts[0]
 
 // Hub
-const hubArtifacts = require('../../build/contracts/StaticHub.json')
-const StaticHub = contract(hubArtifacts)
-StaticHub.setProvider(web3.currentProvider)
-let staticHub
+const hubArtifacts = require('../../build/contracts/Hub.json')
+const Hub = contract(hubArtifacts)
+Hub.setProvider(web3.currentProvider)
+let hub
 
 // BLG token
 const blgArtifacts = require('../../build/contracts/BLG.json')
@@ -21,7 +25,7 @@ BLG.setProvider(web3.currentProvider)
 let blgToken
 
 // Local vars
-let allUsers
+let allUsers = []
 let userData = []
 let userLookup = {}
 let loggedEvents = []
@@ -37,7 +41,7 @@ async function initHub () {
   if (!web3.isConnected()) throw 'Web3 is not connected!';
 
   if (argv.hub) {
-    staticHub = await StaticHub.at(argv.hub)
+    hub = await Hub.at(argv.hub)
     console.log('Hub Initd')
   }
 
@@ -47,20 +51,20 @@ async function initHub () {
   }
 
   // Load data for rapid response to clients
-  if (staticHub && blgToken) {
+  if (hub && blgToken) {
     await loadAllUsers()
     await loadAllUserDataAndBLGBalances()
     await loadAllResources()
-    await createContractListeners(staticHub)
+    await createContractListeners(hub)
     await createContractListeners(blgToken)
 
     // Testing
-    loadEvents(staticHub, 0, 'latest')
-    loadEvents(blgToken, 0, 'latest')
+    // loadEvents(hub, 0, 'latest')
+    // loadEvents(blgToken, 0, 'latest')
 
     // Kovan
-    // loadEvents(staticHub, 3500000, 'latest')
-    // loadEvents(blgToken, 3500000, 'latest')
+    loadEvents(hub, 3500000, 'latest')
+    loadEvents(blgToken, 3500000, 'latest')
 
     console.log('Server ready!')
   }
@@ -69,7 +73,7 @@ async function initHub () {
 /**
  * Create listeners for all events of a given contract.
  */
-async function createContractListeners (contract) {
+async function createContractListeners(contract) {
   let userInfo
 
   contract.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch(async (err, res) => {
@@ -85,26 +89,47 @@ async function createContractListeners (contract) {
       console.log('\n')
 
       if (_event === 'LogResourceAdded') {
-        userInfo = await staticHub.getUserData.call(res.args.user)
+        userInfo = await hub.getUserData.call(res.args.user)
         resources.push([res.args.resourceUrl, userInfo[0], 0, res.blockNumber])
+
+      } else if (_event === 'LogResourceRemoved') {
+        // Find and remvove resource from array
+        for (let i = 0; i < resources.length; i++) {
+          if (resources[i][0] === res.args.resourceUrl)
+            resources.splice(i, 1)
+        }
 
       } else if (_event === 'LogResourceLiked')  {
         // find which resource matches the url and update its reputation
         for (let i = 0; i < resources.length; i++) {
-          if (resources[i][0] == res.args.resourceUrl)
+          if (resources[i][0] == res.args.resourceUrl) {
             resources[i][2] = Number(resources[i][2]) + 1
+            break
+          }
         }
 
       } else if (_event === 'LogUserAdded')  {
-        userInfo = await staticHub.getUserData.call(res.args.user)
+        userInfo = await hub.getUserData.call(res.args.user)
         userInfo[3] = 0
         userData.push(userInfo)
         userLookup[res.args.user] = userData.length - 1
 
+      } else if (_event === 'LogUserRemoved')  {
+        const userIndex = userLookup[res.args.user]
+
+        userData.splice(userIndex, 1)
+        delete userLookup[res.args.user]
+
+        // Update all mapped items to new indexes
+        for (user in userLookup) {
+          if (userLookup[user] > userIndex)
+            userLookup[user] -= 1
+        }
+
       } else if (_event === 'LogTokensMinted')  {
         // get the user an update their balance
         const userIndex = userLookup[res.args.to]
-        userData[userIndex][3] = Number(userData[userIndex][3]) + 1 // update reputation by 1 as only mint 1 at a time
+        userData[userIndex][3] = Number(userData[userIndex][3]) + 1000 // update reputation by 1 as only mint 1 at a time
       }
     }
   })
@@ -113,7 +138,7 @@ async function createContractListeners (contract) {
 /**
  * Get all user data from the hub, personal info and token balances.
  */
-async function getAllUserDataAndBLGBalances () {
+async function getAllUserDataAndBLGBalances() {
   if (userData) {
     return userData
 
@@ -127,7 +152,7 @@ async function getAllUserDataAndBLGBalances () {
  * Get all of the active users with in the hub, EOAs.
  * Load into mem.
  */
-async function getAllUsers () {
+async function getAllUsers() {
   if (allUsers) {
     return allUsers
 
@@ -168,7 +193,6 @@ async function getBLGBalance (user) {
   return balance
 }
 
-
 /**
  * @return {Array} Last 10 logged events.
  */
@@ -192,7 +216,7 @@ async function likeResource(resource, ip) {
     return false
 
   // Test call
-  } else if (!(await staticHub.likeResource.call(resource, { from: blgAccount }))) {
+  } else if (!(await hub.likeResource.call(resource, { from: blgAccount }))) {
     return false
 
   } else {
@@ -202,7 +226,7 @@ async function likeResource(resource, ip) {
     likes[resource][ip] = true
 
     // send tx
-    await staticHub.likeResource(resource, { from: blgAccount, gas: 4e6 })
+    await hub.likeResource(resource, { from: blgAccount, gas: 4e6 })
 
     return true
   }
@@ -216,11 +240,11 @@ async function loadAllUserDataAndBLGBalances () {
   let user
 
   for (let i = 0; i < allUsers.length; i++) {
-    user = await staticHub.getUserData.call(allUsers[i])
+    user = await hub.getUserData.call(allUsers[i])
     user.push(await getBLGBalance(allUsers[i]))
     userData.push(user)
 
-    userLookup[allUsers[i]] = userData.length - 1// lookup to update token balance later
+    userLookup[allUsers[i]] = userData.length - 1 // lookup to update token balance later
   }
 }
 
@@ -229,7 +253,14 @@ async function loadAllUserDataAndBLGBalances () {
  * @return {Array} The user EOA addresses.
  */
 async function loadAllUsers () {
-  allUsers = await staticHub.getAllUsers.call()
+  let hubUsers = await hub.getAllUsers.call()
+
+  for (let i = 0; i < hubUsers.length; i++) {
+    // User has not been removed!
+    if (hubUsers[i] !== '0x0000000000000000000000000000000000000000') {
+      allUsers.push(hubUsers[i])
+    }
+  }
 }
 
 /**
@@ -237,14 +268,20 @@ async function loadAllUsers () {
  */
 async function loadAllResources () {
   let userInfo
-  const resourceIds = await staticHub.getResourceIds.call()
+  let resourceInfo
+  const resourceIds = await hub.getResourceIds.call()
 
   for (let i = 0; i < resourceIds.length; i++) {
-    resources.push(await staticHub.getResourceById.call(resourceIds[i]))
+    resourceInfo = await hub.getResourceById.call(resourceIds[i])
 
-    // Get the actual user name not their address
-    userInfo = await staticHub.getUserData.call(resources[i][1])
-    resources[i][1] = userInfo[0]
+    // Resource has not been removed, check user isn't zero
+    if (resourceInfo[1] !== '0x0000000000000000000000000000000000000000') {
+      resources.push(resourceInfo)
+
+      // Get the actual user name not their address
+      userInfo = await hub.getUserData.call(resources[i][1])
+      resources[i][1] = userInfo[0]
+    }
   }
 }
 

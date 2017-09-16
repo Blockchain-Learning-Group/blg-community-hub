@@ -51,7 +51,7 @@ contract('BLG.mint()', accounts => {
     const eventLog = txResponse.logs[0]
     assert.equal(eventLog.event, 'LogErrorString', 'LogErrorString event was not emitted.')
     const errorString = eventLog.args.errorString;
-    assert.notEqual(errorString.indexOf('msg.sender != blgHub'), -1, "Incorrect error message: " + errorString);
+    assert.notEqual(errorString.indexOf('msg.sender != blgHub or blg'), -1, "Incorrect error message: " + errorString);
 
     // Balance
     const balance = await blg.balanceOf.call(user1)

@@ -81,8 +81,8 @@ contract BLG is ERC20, LoggingErrors {
     if (!active_)
       return error('BLG is not yet active, BLG.mint()');
 
-    if (msg.sender != blgHub_)
-      return error('msg.sender != blgHub, BLG.mint()');
+    if (msg.sender != blgHub_ && msg.sender != blg_)
+      return error('msg.sender != blgHub or blg, BLG.mint()');
 
     if (_value <= 0)
       return error('Cannot mint a value of <= 0, BLG.mint()');

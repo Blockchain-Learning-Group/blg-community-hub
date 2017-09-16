@@ -13,35 +13,34 @@ console.log(argv.hub)
 
 // User addresses to add to the hub
 const users = [
-  {
-    // Metamask AJL kovan account
-    EOA: '0x9Cb47a806AC793CE9739dd138Be3b9DEB16C14E4',
-    userName: 'Adam Lemmon',
-    position: 'Engineer',
-    location: 'London, UK'
-  },
+  '0x9cb47a806ac793ce9739dd138be3b9deb16c14e4',
+  '0x6f087f1fcca13351873eb815ced3285952fbf89a'
 ]
 
-addUsers()
+removeUsers()
 
-async function addUsers() {
+async function removeUsers() {
   const hub = await Hub.at(argv.hub)
   let tx
 
   for (let i = 0; i < users.length; i++) {
-    console.log('Adding user: ' + users[i].userName)
+    console.log('Removing user: ' + users[i])
 
-    tx = await hub.addUser(
-      users[i].EOA,
-      users[i].userName,
-      users[i].position,
-      users[i].location,
-      { from: blgAccount, gas: 4e6 }
-    )
+    // Get their index within the user array
+    const hubUsers = await hub.getAllUsers()
 
-    console.log(tx.logs[0])
+    for (let j = 0; j < hubUsers.length; j++) {
+      if (hubUsers[j] === users[i]) {
+        tx = await hub.removeUser(
+          users[i],
+          j,
+          { from: blgAccount, gas: 4e6 }
+        )
 
-    // Send 1 ether to each user
-    console.log(web3.eth.sendTransaction({ from: blgAccount, to: users[i].EOA, value: 1*10**18 }))
+        console.log(tx.logs[0])
+
+        break
+      }
+    }
   }
 }

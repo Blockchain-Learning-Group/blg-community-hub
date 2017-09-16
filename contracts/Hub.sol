@@ -49,9 +49,11 @@ contract Hub is LoggingErrors {
   /**
    * Events
    */
-   event LogResourceAdded (address user, string resourceUrl, uint blockNumber);
+   event LogResourceAdded(address user, string resourceUrl, uint blockNumber);
+   event LogResourceRemoved(string resourceUrl);
    event LogResourceLiked(string resourceUrl);
-   event LogUserAdded (address user);
+   event LogUserAdded(address user);
+   event LogUserRemoved(address user);
 
   /**
    * @dev CONSTRUCTOR - Set the address of the _blgToken
@@ -131,7 +133,7 @@ contract Hub is LoggingErrors {
    external
    returns (bool)
  {
-   if (msg.sender !=blg_)
+   if (msg.sender != blg_)
      return error('msg.sender != blg, Hub.addUser()');
 
    if (userData_[_userEOA].state_ != State_.doesNotExist)
@@ -188,6 +190,39 @@ contract Hub is LoggingErrors {
     return true;
   }
 
+  /**
+   * @dev Remove a resource from the hub.
+   * @param _resourceUrl The url of the resource to be removed.
+   * @return Success of the transaction.
+   */
+  function removeResource(string _resourceUrl)
+    external
+  {
+    require(msg.sender == blg_);
+
+    /* TODO remove from array as well, get index off chain and use as input param here */
+    delete resources_[keccak256(_resourceUrl)];
+
+    LogResourceRemoved(_resourceUrl);
+  }
+
+  /**
+   * @dev Remove a user from the hub.
+   * @param _userEOA The user to be removed.
+   * @param _userIndex The index where the user lives within the array.
+   * @return Success of the transaction.
+   */
+  function removeUser(address _userEOA, uint _userIndex)
+    external
+  {
+    require(msg.sender == blg_);
+
+    delete users_[_userIndex];
+    delete userData_[_userEOA];
+
+    LogUserRemoved(_userEOA);
+  }
+
   // CONSTANTS
   /**
    * @return The array of users.
@@ -204,7 +239,7 @@ contract Hub is LoggingErrors {
    * @param _id The id of the resource to retrieve.
    * @return The resource object data.
    */
-  function getResourceById (bytes32 _id)
+  function getResourceById(bytes32 _id)
     external
     constant
     returns(string, address, uint, uint)
@@ -222,7 +257,7 @@ contract Hub is LoggingErrors {
   /**
    * @return The resource ids.
    */
-  function getResourceIds ()
+  function getResourceIds()
     external
     constant
     returns(bytes32[])
@@ -235,7 +270,7 @@ contract Hub is LoggingErrors {
    * @param _user The user EOA used as identifier.
    * @return The struct of user data.
    */
-  function getUserData (address _user)
+  function getUserData(address _user)
     external
     constant
     returns(string, string, string)

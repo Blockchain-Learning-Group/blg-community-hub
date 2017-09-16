@@ -10,27 +10,18 @@ Hub.setProvider(web3.currentProvider)
 const blgAccount = web3.eth.accounts[0]
 const resources = [
   'https://blockchainlearninggroup.com',
-  // 'https://etherscan.io',
-  // 'https://etherscan2.io',
-  // 'https://etherscan3.io',
-  // 'https://etherscan4.io',
-  // 'https://etherscan5.io',
-  // 'https://etherscan6.io',
-  // 'https://etherscan7.io',
-  // 'https://etherscan8.io',
-  // 'https://etherscan9.io',
 ]
 
-addResources()
+removeResources()
 
-async function addResources() {
+async function removeResources() {
   const hub = await Hub.at(argv.hub)
   let tx
 
   for (let i = 0; i < resources.length; i++) {
     console.log('Adding resource: ' + resources[i])
 
-    tx = await hub.addResource(resources[i], { from: web3.eth.accounts[9], gas: 4e6 })
+    tx = await hub.removeResource(resources[i], { from: blgAccount, gas: 4e6 })
 
     console.log(tx.logs[0])
   }
