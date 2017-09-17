@@ -54,10 +54,11 @@ ie. const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
 9. Start the Server, specifying contract addresses
 ```
 community-hub $ cd app
-app $ npm run start -- --hub <hubAddress> --blgToken <blgAddress>
+app $ node server --hub <hubAddress> --blgToken <blgAddress>
 ```
 
-4. Navigate to url: localhost: 8081
+4. Navigate to localhost: 8081
+The hub is live!
 
 ## Populating the hub
 1. Add users
@@ -71,8 +72,3 @@ $ npm run addUsers -- --hub <hubAddress>
 ```
 $ npm run addResources -- --hub <hubAddress>
 ```
-
-## Client Setup
-1. Add ABI and address of the hub
-- peg/app/js/home.js
-- copy the contents of build/contracts/StaticHub.json into the top and update the address
