@@ -1,25 +1,60 @@
 # Blockchain Learning Group Inc. Community Hub
-## Deploy
-0. Ensure client is running
+## DApp Developmnet Fundamentals Quick Start
+1. Clone Me :)
+```
+$ cd /fav_dir/
+$ git clone git@github.com:Blockchain-Learning-Group/community-hub.git
+$ cd community-hub
+```
+
+2. Checkout Correct Branch
+```
+community-hub $ git checkout non_upgradeable
+```
+
+3. Install Dependencies
+```
+community-hub $ npm install
+```
+
+4. Run an Ethereum Client
+In a separate terminal.
 ```
 $ testrpc
-
-or
-
-parity --chain kovan --rpccorsdomain "*" --warp --unlock 0x00d97ed9c78804dbce8ffd3b7317ad714ededde2,0x0019fE4E0b78f66c767e674F59c466E554c5764a,0x00Da7097facb61d85cD981546741b7f4dB1Eb130,0x00e7d5760069363F59116c9177C069F45ca28D46,0x12b62f69DB8b38f694643eCC917D9B4e9B14cBA4 --password "adamjlemmon_account.file"
-```
-1. Deploy all contracts.
-```
-$ truffle migrate
 ```
 
-2. Update client with most recentl ABIs and addresses for BLG and StaticHub
-- app/client/js/home.js
-- copy the contents of the build jsons into the top and update the addresses
-
-3. Start the server, add hub and token addresses
+5. Compile All Contracts
 ```
-$ npm run start -- --hub <hubAddress> --blgToken <blgAddress>
+community-hub $ truffle compile
+```
+
+6. Execute Test Suite
+```
+community-hub $ truffle test
+```
+
+7. Deploy All Contracts.
+```
+community-hub $ truffle migrate
+```
+
+8. Update the Client with Deployed Contract Addresses
+community-hub/app/client/js/home.js#L27
+```
+const HubAddress = <deployed Hub address>
+ie. const HubAddress = '0x4519b80e842c4e8a9538997c39550dc724c28427'
+```
+
+community-hub/app/client/js/home.js#L619
+```
+const blgTokenAddress = <deployed BLG address>
+ie. const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
+```
+
+9. Start the Server, specifying contract addresses
+```
+community-hub $ cd app
+app $ npm run start -- --hub <hubAddress> --blgToken <blgAddress>
 ```
 
 4. Navigate to url: localhost: 8081

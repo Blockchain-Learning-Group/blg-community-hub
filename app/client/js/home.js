@@ -24,7 +24,7 @@ const listenerEventCallbacks = {
 
 // Contract data in order to create refernence to deployed contracts
 // Web3 requires the contracts deplyoed address and ABI
-const HubAddress = '0x4519b80e842c4e8a9538997c39550dc724c28427'
+const HubAddress = '0xcb90b83ceebce3e99b4efaecff4e5df37e16e729'
 const Hub = {
   "contract_name": "Hub",
   "abi": [
@@ -616,7 +616,7 @@ const Hub = {
   "updated_at": 1505575663836
 }
 
-const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
+const blgTokenAddress = '0xcc7fa670071980c32665f9032c2e71f221b2c359'
 const blg = {
   "contract_name": "BLG",
   "abi": [
