@@ -1,10 +1,18 @@
+/*
+ Blockchain Learning Group's Community Hub.
+ Client side interface.  Primarily listening for events in order to update the
+ interface in near real-time.  All data loaded and served server side.
+ */
+
 const apiURL = 'http://localhost:8081/'
 
+// Globals
 let web3
 let hub
 let blgToken
 let likes = {}
 
+// Callbacks for when events are fired
 const listenerEventCallbacks = {
   'LogResourceAdded': resourceAddedCb,
   'LogResourceLiked': resourceLikedCb,
@@ -14,8 +22,9 @@ const listenerEventCallbacks = {
   'LogActivated': blgTokenActivatedCb
 }
 
-// Ugly contract data for ease, rquired for events!
-const HubAddress = '0x848efcfd7c4931d8a2fbd40528b0279f4c6a2223'
+// Contract data in order to create refernence to deployed contracts
+// Web3 requires the contracts deplyoed address and ABI
+const HubAddress = '0x4519b80e842c4e8a9538997c39550dc724c28427'
 const Hub = {
   "contract_name": "Hub",
   "abi": [
@@ -607,7 +616,7 @@ const Hub = {
   "updated_at": 1505575663836
 }
 
-const blgTokenAddress = '0x8b78e231ee2d5551b215f9a482413f69db558c38'
+const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
 const blg = {
   "contract_name": "BLG",
   "abi": [
@@ -1305,7 +1314,7 @@ $(document).ready(() => {
 /**
  * Initialize the app, loading data primarily.
  */
-async function initializeApp () {
+async function initializeApp() {
   await initEtherConnection()
   await initBLGAndHubContracts()
   loadAllUsers()
@@ -1321,7 +1330,7 @@ async function initializeApp () {
  * @param  {Address} user  User's EOA address.
  * @param  {Number} timestamp The time this resource was added at.
  */
-function appendNewResource (url, user, reputation, blockNumber) {
+function appendNewResource(url, user, reputation, blockNumber) {
   // custom id for each resource
   let idUrl = url.replace('https://', '')
   idUrl = idUrl.replace('.', '')
@@ -1392,156 +1401,95 @@ function appendNewUser(userData) {
 }
 
 /**
- * Create listeners for all events of a given contract.
+ * BLG Token contract has become active
+ * @param  {Object} res The event log object.
  */
-async function createContractListeners (contract) {
-  contract.allEvents({ fromBlock: 'latest', toBlock: 'latest' }).watch((err, res) => {
+function blgTokenActivatedCb(res) {
+  console.log('blgTokenActivatedCb')
+  console.log(res)
+}
+
+/**
+ * Create listeners for all events of a given contract.
+ * @param  {Object} contract The contract reference object.
+ */
+async function createContractListeners(contract) {
+  contract.allEvents({ fromBlock: 'latest', toBlock: 'latest' })
+  .watch((err, res) => {
     if (err) {
       console.log(err)
 
     } else if (res['event']) {
       _event = res['event']
-      // Update newsfeed with all events then event specific callback
+      // Update newsfeed with all events then invoke event specific callback
       updateNewsFeed(res)
       listenerEventCallbacks[_event](res)
     }
   })
 }
 
-/*
- Event Callbacks
+/**
+ * An error event has been loggged.
+ * @param  {Object} res The event log object.
  */
-function blgTokenActivatedCb(res) {
-   console.log('blgTokenActivatedCb')
-   console.log(res)
- }
-
 function errorStringCb(res) {
-   console.log('errorStringCb')
-   console.log(res)
- }
-
-async function tokensMintedCb(res) {
-  console.log('tokensMintedCb')
+  console.log('errorStringCb')
   console.log(res)
-  // Update balance of user in table
-  const userData = await hub.getUserData.call(res.args.to)
-  // TODO update cell in table for user that received the tokens
-  updateBLGTotalSupply()
 }
 
 /**
- * Callback when resource added event is emitted by hub. Append the resource the
- * the resource table
- * @param  {Object} res The event log object.
+ * Instatiate the contract reference objects for both the blg token and hub contracts.
  */
-async function resourceAddedCb(res) {
-  // Get the real user name not the address
-  const userData = await hub.getUserData.call(res.args.user)
-  appendNewResource(res.args.resourceUrl, userData[0], 0, res.args.blockNumber)
-  updateBLGTotalSupply()
-}
-
-/**
- * Callback when resource liked event is emitted by hub. Update the resource # of likes.
- * @param  {Object} res The event log object.
- */
-async function resourceLikedCb(res) {
-  console.log('resourceLikedCb')
-  console.log(res)
-
-  const url = res.args.resourceUrl
-
-  let idUrl = url.replace('https://', '')
-  idUrl = idUrl.replace('.', '')
-  idUrl = idUrl.replace(/-/g, '')
-  idUrl = idUrl.replace(/\//g, '')
-
-  const reputationId = idUrl + 'rep'
-
-  // Update ui with new like
-  const reputation = $('#' + reputationId)
-  const currentRep = reputation.text()
-  const newRep = Number(currentRep) + 1
-  reputation.text(newRep)
-}
-
-async function userAddedCb(res) {
-  console.log('userAddedCb')
-  console.log(res)
-  const userData = await hub.getUserData.call(res.args.user)
-  userData[3] = 0 // default to 0 blg tokens
-  appendNewUser(userData)
-}
-
-/**
- * [initBLGAndHubContracts description]
- */
-async function initBLGAndHubContracts () {
+async function initBLGAndHubContracts() {
   hub = await web3.eth.contract(Hub.abi).at(HubAddress)
   blgToken = await web3.eth.contract(blg.abi).at(blgTokenAddress)
   updateBLGTotalSupply()
 }
 
 /**
- * Initialize the connection to an ether client.
+ * Initialize the connection to a local ether client.
  */
-async function initEtherConnection () {
-  // TODO: define public ip to connect to hosted node!
-  // Local Dev client connection
+async function initEtherConnection() {
   web3 = new Web3(
     new Web3.providers.HttpProvider('http://localhost:8545')
   );
 
-  // Deploy on Kovan testnet via infura, NOTE cannot watch events!
-  // web3 = new Web3(
-  //   new Web3.providers.HttpProvider('https://kovan.infura.io/thMAdMI5QeIf8dirn63U')
-  // );
-
+  // Quick check that web3 connection successful
   console.log('wbe3 Connected? ' + web3.isConnected());
 }
 
 /**
- * Get all users within the hub and load into table.
- * TODO: look to get just active users?
+ * Load newsfeed with 10 latest events as returned by server.
  */
-async function loadAllUsers () {
-  // TODO define this url in a nice format
-  const url = 'http://localhost:8081/loadUsers'
-
+function loadNewsFeed() {
   $.ajax({
-     url: url,
-     data: {
-        format: 'json'
-     },
-     error: err => {
-       console.error('error: ' + error)
-     },
-     success: users => {
-       users.sort(sortUsersByReputation);
-
-       for (let i = 0; i < users.length; i++) {
-         appendNewUser(users[i])
-       }
-     },
-     type: 'GET'
+    url: apiURL + 'loadEvents',
+      data: {
+      format: 'json'
+    },
+    error: error => {
+      console.error(error)
+    },
+    success: events => {
+      for (let i = 0; i < events.length; i++) {
+        updateNewsFeed(events[i])
+      }
+    },
+      type: 'GET'
   });
 }
 
 /**
  * Get all resources within the hub and load into table.
  */
-async function loadAllResources () {
-  // TODO define this url in a nice format
-  const url = 'http://localhost:8081/loadResources'
-
+function loadAllResources () {
   $.ajax({
-     url: url,
+     url: apiURL + 'loadResources',
      data: {
         format: 'json'
      },
-     error: err => {
-       console.error('error: ' + error)
+     error: error => {
+       console.error(error)
      },
      success: resources => {
        // Sort by highest reputation
@@ -1561,26 +1509,39 @@ async function loadAllResources () {
 }
 
 /**
- * Load newsfeed with 10 latest events.
+ * Load all users within the hub into the table.
  */
-function loadNewsFeed() {
-  const url = 'http://localhost:8081/loadEvents'
-
+function loadAllUsers() {
   $.ajax({
-     url: url,
+     url: apiURL + 'loadUsers',
      data: {
         format: 'json'
      },
-     error: err => {
-       console.log('error: ' + err)
+     error: error => {
+       console.error(error)
      },
-     success: events => {
-       for (let i = 0; i < events.length; i++) {
-         updateNewsFeed(events[i])
+     success: users => {
+       // Append users to table in order of reputation
+       users.sort(sortUsersByReputation);
+
+       for (let i = 0; i < users.length; i++) {
+         appendNewUser(users[i])
        }
      },
      type: 'GET'
   });
+}
+
+/**
+ * Callback when resource added event is emitted by hub. Append the resource the
+ * the resource table
+ * @param  {Object} res The event log object.
+ */
+async function resourceAddedCb(res) {
+  // Get the real user name not the address, user name @ userData[0]
+  const userData = await hub.getUserData.call(res.args.user)
+  appendNewResource(res.args.resourceUrl, userData[0], 0, res.args.blockNumber)
+  updateBLGTotalSupply()
 }
 
 /**
@@ -1594,8 +1555,8 @@ async function resourceLiked(resourceUrl, ip) {
      data: {
         format: 'json'
      },
-     error: err => {
-       console.error('error: ' + err)
+     error: error => {
+       console.error(error)
      },
      success: res => {
       if (!(res)) {
@@ -1607,10 +1568,36 @@ async function resourceLiked(resourceUrl, ip) {
 }
 
 /**
+ * Callback when resource liked event is emitted by hub. Update the resource # of likes.
+ * NOTE note currently active.
+ * @param  {Object} res The event log object.
+ */
+function resourceLikedCb(res) {
+  console.log('resourceLikedCb')
+  console.log(res)
+
+  const url = res.args.resourceUrl
+
+  // Parse out non-id friendly chars from the url
+  let idUrl = url.replace('https://', '')
+  idUrl = idUrl.replace('.', '')
+  idUrl = idUrl.replace(/-/g, '')
+  idUrl = idUrl.replace(/\//g, '')
+
+  const reputationId = idUrl + 'rep'
+
+  // Update ui with new like
+  const reputation = $('#' + reputationId)
+  const currentRep = reputation.text()
+  const newRep = Number(currentRep) + 1
+  reputation.text(newRep)
+}
+
+/**
  * Sort the 2D array by the reputation column.
- * @param  {[type]} a [description]
- * @param  {[type]} b [description]
- * @return {[type]}   [description]
+ * @param  {Array} a Sub array element n.
+ * @param  {Array} b Sub array element n + 1.
+ * @return {Array}   Sorted array.
  */
 function sortResourcesByReputation (a, b) {
   if (a[2] === b[2]) {
@@ -1622,9 +1609,9 @@ function sortResourcesByReputation (a, b) {
 
 /**
  * Sort the 2D array by the reputation column.
- * @param  {[type]} a [description]
- * @param  {[type]} b [description]
- * @return {[type]}   [description]
+ * @param  {Array} a Sub array element n.
+ * @param  {Array} b Sub array element n + 1.
+ * @return {Array}   Sorted array.
  */
 function sortUsersByReputation (a, b) {
   if (a[3] === b[3]) {
@@ -1632,6 +1619,21 @@ function sortUsersByReputation (a, b) {
   } else {
     return (a[3] > b[3]) ? -1 : 1;
   }
+}
+
+/**
+ * BLG tokens have been minted.
+ * @param  {Object} res The event log object.
+ */
+async function tokensMintedCb(res) {
+  console.log('tokensMintedCb')
+  console.log(res)
+
+  // Update balance of user in table
+  // TODO update cell in table for user that received the tokens
+  const userData = await hub.getUserData.call(res.args.to)
+
+  updateBLGTotalSupply()
 }
 
 /**
@@ -1644,8 +1646,7 @@ async function updateBLGTotalSupply() {
 
 /**
  * Prepend a new item to the newsfeed table
- * @param  {[type]} data [description]
- * @return {[type]}      [description]
+ * @param  {Object} data The event log object.
  */
 async function updateNewsFeed(data) {
   let _event = data['event'].replace('Log', '')
@@ -1653,6 +1654,8 @@ async function updateNewsFeed(data) {
   let args
 
   let userData
+
+  // Define event specific attributes(img, arguments) and prepend
   if (_event === 'UserAdded') {
     img = '<img class="d-flex mr-3 rounded-circle" src="img/userAdded.png" height="55" width="55">'
     userData = await hub.getUserData.call(data.args.user)
@@ -1682,6 +1685,7 @@ async function updateNewsFeed(data) {
     return
   }
 
+  // Finally prepend the div to the table
   $('#newsFeed').prepend(
     '<a href="#" class="list-group-item list-group-item-action">'
       +'<div class="media">'
@@ -1695,4 +1699,16 @@ async function updateNewsFeed(data) {
       +'</div>'
     +'</a>'
   )
+}
+
+/**
+ * A user has been added to the hub.
+ * @param  {Object} res The event log object.
+ */
+async function userAddedCb(res) {
+  console.log('userAddedCb')
+  console.log(res)
+  const userData = await hub.getUserData.call(res.args.user)
+  userData[3] = 0 // Reputation / holdings default to 0 blg tokens
+  appendNewUser(userData)
 }

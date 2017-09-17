@@ -1,3 +1,8 @@
+/*
+ Basic Express server.
+ Minimal routing sufficient for client data retrieval.
+ */
+
 const express = require('express')
 const app = express()
 const etherUtils = require('./server/ether')
@@ -31,7 +36,7 @@ app.get('/loadEvents', async (req, res) => {
 })
 
 /**
- * Load 10 latest events.
+ * A resource has been liked, update it's reputation.
  */
 app.post('/resourceLiked/:resource/:userIp', async (req, res) => {
   const response = await etherUtils.likeResource(req.params.resource, req.params.userIp)

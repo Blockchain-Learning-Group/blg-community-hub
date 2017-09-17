@@ -6,9 +6,9 @@ import './utils/SafeMath.sol';
 
 /**
  * @title Static Exposed BLG Hub
- * @dev Interface all users, applications, etc with interface with
- * This interface remains static and will not change where the logic
- * implemented in the Hub libraries may be upgraded.
+ * @author Adam Lemmon <adam@blockchainlearninggroup.com>
+ * @dev BLG hub that enables users to share resources and are rewarded for contribution
+ * with BLG tokens.
  */
 contract Hub is LoggingErrors {
   uint public constant RESOURCE_REWARD = 1000;
@@ -124,34 +124,34 @@ contract Hub is LoggingErrors {
    * @param _location Geographic location.
    * @return Success of the transaction.
    */
- function addUser (
-   address _userEOA,
-   string _userName,
-   string _position,
-   string _location
- )
-   external
-   returns (bool)
- {
-   if (msg.sender != blg_)
-     return error('msg.sender != blg, Hub.addUser()');
+  function addUser (
+    address _userEOA,
+    string _userName,
+    string _position,
+    string _location
+  )
+    external
+    returns (bool)
+  {
+    if (msg.sender != blg_)
+      return error('msg.sender != blg, Hub.addUser()');
 
-   if (userData_[_userEOA].state_ != State_.doesNotExist)
-     return error('User already exists, Hub.addUser()');
+    if (userData_[_userEOA].state_ != State_.doesNotExist)
+      return error('User already exists, Hub.addUser()');
 
-   users_.push(_userEOA);
+    users_.push(_userEOA);
 
-   userData_[_userEOA] = User_({
-     userName_: _userName,
-     position_: _position,
-     location_: _location,
-     state_: State_.active
-   });
+    userData_[_userEOA] = User_({
+      userName_: _userName,
+      position_: _position,
+      location_: _location,
+      state_: State_.active
+    });
 
-   LogUserAdded(_userEOA);
+    LogUserAdded(_userEOA);
 
-   return true;
- }
+    return true;
+  }
 
   /**
    * @dev Like an existing resource to within the hub.
@@ -224,6 +224,7 @@ contract Hub is LoggingErrors {
   }
 
   // CONSTANTS
+  
   /**
    * @return The array of users.
    */

@@ -1,17 +1,23 @@
+/*
+ Backend interface with Ethereum via the web3 API.
+ Instantiate contract references and load all relevant data.
+ Listen for all events and store locally for client side access.
+ */
+
+// Cmd line args
 const argv = require('yargs')
 .option('hub', { description: 'Hub contract address to interface with.', demand: true, type: 'string' })
 .option('blgToken', { description: 'BLG token contract address.', demand: true, type: 'string' })
 .argv
 
-const contract = require('truffle-contract')
+// Init a web3 connection, to locally running node
 const Web3 = require('web3')
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
-// Deploy on Kovan testnet via infura, NOTE cannot watch events!
-// const web3 = new Web3(
-//   new Web3.providers.HttpProvider('https://kovan.infura.io/thMAdMI5QeIf8dirn63U')
-// );
-const blgAccount = web3.eth.accounts[0]
 
+// Truffle contract library utilized for contract abstraction
+const contract = require('truffle-contract')
+
+// Load contract data in order to create reference objects
 // Hub
 const hubArtifacts = require('../../build/contracts/Hub.json')
 const Hub = contract(hubArtifacts)
@@ -24,6 +30,9 @@ const BLG = contract(blgArtifacts)
 BLG.setProvider(web3.currentProvider)
 let blgToken
 
+// Default account to send txs
+const blgAccount = web3.eth.accounts[0]
+
 // Local vars
 let allUsers = []
 let userData = []
@@ -35,22 +44,25 @@ let likes = {}
 initHub()
 
 /**
- * Initialize an interface with the deployed hub.
+ * Create the reference objects for the blg token and hub.
+ * Load all hub data.
+ * Create both blg and hub event listeners.
  */
 async function initHub () {
   if (!web3.isConnected()) throw 'Web3 is not connected!';
 
+  // Create contract objects
   if (argv.hub) {
     hub = await Hub.at(argv.hub)
-    console.log('Hub Initd')
+    console.log('Hub created!')
   }
 
   if (argv.blgToken) {
     blgToken = await BLG.at(argv.blgToken)
-    console.log('BLG token Initd')
+    console.log('BLG token created!')
   }
 
-  // Load data for rapid response to clients
+  // Load data for rapid response to client connections
   if (hub && blgToken) {
     await loadAllUsers()
     await loadAllUserDataAndBLGBalances()
@@ -58,13 +70,15 @@ async function initHub () {
     await createContractListeners(hub)
     await createContractListeners(blgToken)
 
+    // NOTE when on public test or main net do not need to load events from block 0
+    // Look to define "birth" block of when the contract was deployed
     // Testing
-    // loadEvents(hub, 0, 'latest')
-    // loadEvents(blgToken, 0, 'latest')
+    loadEvents(hub, 0, 'latest')
+    loadEvents(blgToken, 0, 'latest')
 
-    // Kovan
-    loadEvents(hub, 3500000, 'latest')
-    loadEvents(blgToken, 3500000, 'latest')
+    // Kovan example, from block udpated
+    // loadEvents(hub, 3500000, 'latest')
+    // loadEvents(blgToken, 3500000, 'latest')
 
     console.log('Server ready!')
   }
@@ -83,11 +97,14 @@ async function createContractListeners(contract) {
     } else if (res['event']) {
       // append to list of caught events
       loggedEvents.push(res)
+
+      // Ugly logging...
       const _event = res['event']
       console.log('\n*** New Event: ' + _event + ' ***')
       console.log(res)
       console.log('\n')
 
+      // Event specific actions
       if (_event === 'LogResourceAdded') {
         userInfo = await hub.getUserData.call(res.args.user)
         resources.push([res.args.resourceUrl, userInfo[0], 0, res.blockNumber])
@@ -116,7 +133,6 @@ async function createContractListeners(contract) {
 
       } else if (_event === 'LogUserRemoved')  {
         const userIndex = userLookup[res.args.user]
-
         userData.splice(userIndex, 1)
         delete userLookup[res.args.user]
 
@@ -137,6 +153,8 @@ async function createContractListeners(contract) {
 
 /**
  * Get all user data from the hub, personal info and token balances.
+ * Method utilized by client to retrieve data.
+ * @return {Array} All users' data, name, position, location, BLG holdings.
  */
 async function getAllUserDataAndBLGBalances() {
   if (userData) {
@@ -150,7 +168,8 @@ async function getAllUserDataAndBLGBalances() {
 
 /**
  * Get all of the active users with in the hub, EOAs.
- * Load into mem.
+ * Method utilized by client to retrieve data.
+ * @return {Array} All user addresses.
  */
 async function getAllUsers() {
   if (allUsers) {
@@ -164,6 +183,7 @@ async function getAllUsers() {
 
 /**
  * Get all resources within the hub.
+ * Method utilized by client to retrieve data.
  * @return {Array} The string urls.
  */
 async function getAllResources () {
@@ -194,14 +214,16 @@ async function getBLGBalance (user) {
 }
 
 /**
- * @return {Array} Last 10 logged events.
+ * Utilized by client to load latest event upon connecting.
+ * @return {Array} Last 10 logged events, or less.
  */
 function getLatestEvents() {
-  if (loggedEvents.length >= 11)
+  if (loggedEvents.length >= 11) {
     return loggedEvents.slice(loggedEvents.length - 11, -1)
 
-  else
+  } else {
     return loggedEvents
+  }
 }
 
 /**
@@ -250,7 +272,7 @@ async function loadAllUserDataAndBLGBalances () {
 
 /**
  * Load all of the active users with in the hub, EOAs.
- * @return {Array} The user EOA addresses.
+ * Some items may be 0x0 signifying the user has been removed
  */
 async function loadAllUsers () {
   let hubUsers = await hub.getAllUsers.call()
@@ -265,6 +287,7 @@ async function loadAllUsers () {
 
 /**
  * Load all existing resources from the contract into storage.
+ * Some resources owner may be 0x0 signifying the resource has been removed.
  */
 async function loadAllResources () {
   let userInfo
@@ -287,15 +310,14 @@ async function loadAllResources () {
 
 /**
  * Load all events emitted by the given contract from block and to block
- * @param  {Contract} contract Contract instance.
+ * @param  {Contract} contract Contract reference object.
  * @param  {Integer} from  The block to start looking for events from.
  * @param  {Integer} to  The block to look for events to, may be 'latest'.
  * @return {[type]}          [description]
  */
 async function loadEvents(contract, from, to) {
   contract.allEvents({ fromBlock: from, toBlock: to }).get((err, events) => {
-    if (err)
-      console.error(err)
+    if (err) console.error(err)
 
     loggedEvents = loggedEvents.concat(events)
   })

@@ -13,8 +13,7 @@
     "removeUsers": "node ./scripts/removeUsers.js",
     "addResources": "node ./scripts/addResources.js",
     "removeResources": "node ./scripts/removeResources.js",
-    "mint": "node ./scripts/mint.js",
-    "testSetup": "node ./scripts/testSetup.js"
+    "mint": "node ./scripts/mint.js"
   },
   "engines": {
     "node": ">=8"

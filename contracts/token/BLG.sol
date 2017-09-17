@@ -6,8 +6,8 @@ import '../utils/LoggingErrors.sol';
 
 /**
  * @title BLG Token
- * @dev A reward token for participants in the BLG community.  Rewarded for
- * contributions to the community hub.
+ * @author Adam Lemmon <adam@blockchainlearninggroup.com>
+ * @dev A reward token for participants in the BLG community.
  */
 contract BLG is ERC20, LoggingErrors {
 
@@ -19,8 +19,17 @@ contract BLG is ERC20, LoggingErrors {
    */
   uint public constant DECIMALS = 18;
   string public constant NAME = 'BLG';
+
+  // Amount of tokens currentl in circulation
   uint256 public totalSupply_;
+
+  // User balances on blg tokens
   mapping (address => uint256) public balances_;
+
+  // Allowances that a user has given to another user in order to allow then to spend
+  // tokens on their behalf
+  // owner => approved spender => amount
+  // ie. bob => alice => 100 means that bob has approved alice to spend 100 of his tokens.
   mapping(address => mapping (address => uint256)) public allowed_;
 
   address public blg_; // EOA
@@ -46,27 +55,27 @@ contract BLG is ERC20, LoggingErrors {
    * External
    */
 
-   /**
-    * @dev Approve a user to spend your tokens.
-    * @param _spender The user to spend your tokens.
-    * @param _amount The amount to increase the spender's allowance by. Totaling
-    * the amount of tokens they may spend on the senders behalf.
-    * @return The success of this method.
-    */
-   function approve(address _spender, uint256 _amount)
-     external
-     returns (bool)
-   {
-     if (_amount <= 0)
-       return error('Can not approve an amount <= 0, BLG.approve()');
+  /**
+   * @dev Approve a user to spend your tokens.
+   * @param _spender The user to spend your tokens.
+   * @param _amount The amount to increase the spender's allowance by. Totaling
+   * the amount of tokens they may spend on the senders behalf.
+   * @return The success of this method.
+   */
+  function approve(address _spender, uint256 _amount)
+    external
+    returns (bool)
+  {
+    if (_amount <= 0)
+      return error('Can not approve an amount <= 0, BLG.approve()');
 
-     if (_amount > balances_[msg.sender])
-       return error('Amount is greater than senders balance, BLG.approve()');
+    if (_amount > balances_[msg.sender])
+      return error('Amount is greater than senders balance, BLG.approve()');
 
-     allowed_[msg.sender][_spender] = allowed_[msg.sender][_spender].add(_amount);
+    allowed_[msg.sender][_spender] = allowed_[msg.sender][_spender].add(_amount);
 
-     return true;
-   }
+    return true;
+  }
 
   /**
    * @dev Mint tokens and allocate them to the specified user.

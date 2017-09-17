@@ -1,17 +1,18 @@
 const argv = require('yargs')
 .option('hub', { description: 'Hub contract address to interface with.', demandOption: true, type: 'string' })
 .argv
+
 const contract = require('truffle-contract')
 const Web3 = require('web3')
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
 const hubArtifacts = require('../build/contracts/Hub.json')
+
 const Hub = contract(hubArtifacts)
 Hub.setProvider(web3.currentProvider)
+
 const blgAccount = web3.eth.accounts[0]
 
-console.log(argv.hub)
-
-// User addresses to add to the hub
+// User information to add to the hub
 const users = [
   {
     // Metamask AJL kovan account
@@ -19,6 +20,13 @@ const users = [
     userName: 'Adam Lemmon',
     position: 'Engineer',
     location: 'London, UK'
+  },
+  {
+    // Metamask MJL kovan account
+    EOA: '0x9d5F6CE9E32523B0BD60f4B2F716C695CBe334F3',
+    userName: 'Mike Lemmon',
+    position: 'Scrum Master',
+    location: 'Burlington, CA'
   },
 ]
 
