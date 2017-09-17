@@ -4,15 +4,17 @@
   "license": "TBD",
   "private:": false,
   "dependencies": {
+    "ethereumjs-abi": "^0.6.4",
     "express": "^4.15.4",
     "solc": "^0.4.15",
+    "truffle-contract": "^3.0.0",
     "web3": "0.20.0"
   },
   "scripts": {
-    "addUsers": "node ./scripts/addUsers.js",
-    "removeUsers": "node ./scripts/removeUsers.js",
     "addResources": "node ./scripts/addResources.js",
+    "addUsers": "node ./scripts/addUsers.js",
     "removeResources": "node ./scripts/removeResources.js",
+    "removeUsers": "node ./scripts/removeUsers.js",
     "mint": "node ./scripts/mint.js"
   },
   "engines": {
