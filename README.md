@@ -18,7 +18,8 @@ community-hub $ npm install
 ```
 
 4. Run an Ethereum Client
-In a separate terminal widnow / tab.
+
+  *In a separate terminal window / tab.*
 ```
 $ testrpc
 ```
@@ -33,19 +34,20 @@ community-hub $ truffle compile
 community-hub $ truffle test
 ```
 
-7. Deploy All Contracts.
+7. Deploy All Contracts
 ```
 community-hub $ truffle migrate
 ```
 
 8. Update the Client with Deployed Contract Addresses
-community-hub/app/client/js/home.js#L27
+
+  *community-hub/app/client/js/home.js#L27*
 ```
 const HubAddress = <deployed Hub address>
 ie. const HubAddress = '0x4519b80e842c4e8a9538997c39550dc724c28427'
 ```
 
-community-hub/app/client/js/home.js#L619
+  *community-hub/app/client/js/home.js#L619*
 ```
 const blgTokenAddress = <deployed BLG address>
 ie. const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
@@ -54,11 +56,11 @@ ie. const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
 9. Start the Server, specifying contract addresses
 ```
 community-hub $ cd app
-app $ npm run start -- --hub <hubAddress> --blgToken <blgAddress>
+app $ node server --hub <hubAddress> --blgToken <blgAddress>
 ie. node server --hub 0x77cb1679e814b92e0a5fedacebd2fa52a2ac1d24 --blgToken 0x26aab24a2a4002fae820419888fa23d07f121e1b
 ```
 
-10. Navigate to url: localhost: 8081
+10. Navigate to http://localhost:8081
 
 ## Populating the hub
 1. Add users
@@ -72,8 +74,3 @@ $ npm run addUsers -- --hub <hubAddress>
 ```
 $ npm run addResources -- --hub <hubAddress>
 ```
-
-## Client Setup
-1. Add ABI and address of the hub
-- peg/app/js/home.js
-- copy the contents of build/contracts/StaticHub.json into the top and update the address
