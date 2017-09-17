@@ -1,5 +1,5 @@
 # Blockchain Learning Group Inc. Community Hub
-## DApp Developmnet Fundamentals Quick Start
+## DApp Development Fundamentals Quick Start
 1. Clone Me :)
 ```
 $ cd /fav_dir/
