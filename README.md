@@ -18,7 +18,7 @@ community-hub $ npm install
 ```
 
 4. Run an Ethereum Client
-In a separate terminal.
+In a separate terminal widnow / tab.
 ```
 $ testrpc
 ```
@@ -55,9 +55,10 @@ ie. const blgTokenAddress = '0xfec1266f7e026363be4a7b0d10df790bbd92bff4'
 ```
 community-hub $ cd app
 app $ npm run start -- --hub <hubAddress> --blgToken <blgAddress>
+ie. node server --hub 0x77cb1679e814b92e0a5fedacebd2fa52a2ac1d24 --blgToken 0x26aab24a2a4002fae820419888fa23d07f121e1b
 ```
 
-4. Navigate to url: localhost: 8081
+10. Navigate to url: localhost: 8081
 
 ## Populating the hub
 1. Add users
