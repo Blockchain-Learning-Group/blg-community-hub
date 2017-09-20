@@ -1,4 +1,8 @@
 # Blockchain Learning Group Inc. Community Hub
+
+## Useful links and shortcuts
+[Ethereum Genesis Block](https://etherscan.io/block/0)
+
 ## Deploy
 0. Ensure client is running
 ```
